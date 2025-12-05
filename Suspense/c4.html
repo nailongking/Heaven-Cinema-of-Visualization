@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>全球悬疑风格分布</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;700&family=Roboto+Mono:wght@300&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      background-color: #050505;
+      color: #fff;
+      font-family: 'Noto Serif SC', serif;
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #main-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+      border: 1px solid #222;
+      overflow: hidden;
+    }
+
+    h1.main-title {
+      position: absolute;
+      top: 20px;
+      left: 30px;
+      font-size: 24px;
+      color: #fff;
+      letter-spacing: 2px;
+      border-bottom: 2px solid #d63031;
+      padding-bottom: 10px;
+      z-index: 10;
+      pointer-events: none;
+      margin: 0;
+      font-family: 'Noto Serif SC', serif;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    h1.main-title span {
+      font-size: 12px;
+      color: #777;
+      display: block;
+      margin-top: 5px;
+      font-family: 'Roboto Mono', monospace;
+    }
+
+    #chart {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .node rect {
+      cursor: move;
+      fill-opacity: .9;
+      shape-rendering: crispEdges;
+    }
+
+    .node text {
+      pointer-events: none;
+      text-shadow: 0 1px 0 #000;
+      font-size: 12px;
+      fill: #ccc;
+      font-family: 'Roboto Mono', sans-serif;
+    }
+
+    .link {
+      fill: none;
+      stroke-opacity: 0.3;
+      transition: stroke-opacity 0.3s;
+    }
+
+    .link:hover {
+      stroke-opacity: 0.7;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="main-wrapper">
+    <h1 class="main-title">
+      全球悬疑风格分布
+      <span>Geography of Global Mystery Preferences</span>
+    </h1>
+
+    <div id="chart"></div>
+  </div>
+
+  <script>
+    const rawLinks = [
+      { source: "美国", target: "科幻/时空", value: 12 },
+      { source: "美国", target: "心理/惊悚", value: 18 },
+      { source: "美国", target: "犯罪/黑帮", value: 15 },
+      { source: "美国", target: "庭审/越狱", value: 8 },
+
+      { source: "英国", target: "黑色幽默/犯罪", value: 6 },
+      { source: "英国", target: "奇幻/冒险", value: 5 },
+      { source: "英国", target: "侦探/推理", value: 4 },
+
+      { source: "韩国", target: "犯罪/复仇", value: 9 },
+      { source: "韩国", target: "社会/伦理", value: 5 },
+
+      { source: "日本", target: "动画/奇幻", value: 8 },
+      { source: "日本", target: "社会/推理", value: 6 },
+
+      { source: "中国香港", target: "警匪/卧底", value: 10 },
+      { source: "中国香港", target: "武侠/悬疑", value: 4 },
+
+      { source: "西班牙", target: "反转/烧脑", value: 4 },
+      { source: "德国", target: "政治/历史", value: 3 }
+    ];
+
+    const container = document.getElementById("chart");
+    const wrapperWidth = container.clientWidth;
+    const wrapperHeight = container.clientHeight;
+
+    const margin = { top: 100, right: 20, bottom: 20, left: 20 },
+      width = wrapperWidth - margin.left - margin.right,
+      height = wrapperHeight - margin.top - margin.bottom;
+
+    const svg = d3.select("#chart").append("svg")
+      .attr("width", wrapperWidth)
+      .attr("height", wrapperHeight)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    const sankey = d3.sankey()
+      .nodeWidth(15)
+      .nodePadding(15)
+      .extent([[1, 1], [width - 1, height - 6]]);
+
+    const allNodes = Array.from(new Set(rawLinks.flatMap(l => [l.source, l.target])));
+    const nodesData = allNodes.map(name => ({ name }));
+    const linksData = rawLinks.map(d => ({
+      source: allNodes.indexOf(d.source),
+      target: allNodes.indexOf(d.target),
+      value: d.value
+    }));
+
+    const { nodes, links } = sankey({
+      nodes: nodesData,
+      links: linksData
+    });
+
+    const color = d3.scaleOrdinal(d3.schemeTableau10);
+
+  
+    svg.append("g")
+      .attr("fill", "none")
+      .attr("stroke-opacity", 0.5)
+      .selectAll("path")
+      .data(links)
+      .join("path")
+      .attr("class", "link")
+      .attr("d", d3.sankeyLinkHorizontal())
+      .attr("stroke-width", d => Math.max(1, d.width))
+      .attr("stroke", d => {
+        if (d.source.name === "美国") return "#3498db";
+        if (d.source.name === "韩国") return "#e74c3c";
+        if (d.source.name === "日本") return "#f1c40f";
+        if (d.source.name === "中国香港") return "#9b59b6";
+        return "#95a5a6";
+      })
+      .append("title")
+      .text(d => `${d.source.name} → ${d.target.name}\n${d.value}部`);
+
+    svg.append("g")
+      .selectAll("rect")
+      .data(nodes)
+      .join("rect")
+      .attr("class", "node")
+      .attr("x", d => d.x0)
+      .attr("y", d => d.y0)
+      .attr("height", d => d.y1 - d.y0)
+      .attr("width", d => d.x1 - d.x0)
+      .attr("fill", d => color(d.name.replace(/ .*/, "")))
+      .append("title")
+      .text(d => `${d.name}\n${d.value}`);
+
+    svg.append("g")
+      .style("font", "12px 'Roboto Mono', sans-serif") 
+      .selectAll("text")
+      .data(nodes)
+      .join("text")
+      .attr("x", d => d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6)
+      .attr("y", d => (d.y1 + d.y0) / 2)
+      .attr("dy", "0.35em")
+      .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
+      .text(d => d.name)
+      .attr("fill", "#ddd");
+  </script>
+</body>
+
+</html>
