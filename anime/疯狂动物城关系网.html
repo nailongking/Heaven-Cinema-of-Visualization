@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>疯狂动物城人物关系图谱</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI Emoji', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
+            color: #333;
+        }
+
+       
+        .header {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 34px;
+            font-weight: 800;
+            color: #2d3436;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.6);
+            letter-spacing: 2px;
+        }
+
+        .legend {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            font-size: 13px;
+            font-weight: bold;
+            color: #555;
+        }
+        .legend-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 6px; 
+            background: rgba(255,255,255,0.7); 
+            padding: 6px 14px; 
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+
+      
+        #chart {
+            width: 100vw;
+            height: 100vh;
+        }
+
+       
+        .link {
+            transition: all 0.2s ease-out; 
+        }
+
+       
+        .link-label-group {
+            transition: opacity 0.2s ease-out;
+        }
+        .link-label-bg {
+            fill: #ffffff;
+            stroke: #ccc;
+            stroke-width: 1px;
+            rx: 10px;
+            ry: 10px;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+            transition: stroke 0.2s;
+        }
+        .link-label {
+            font-size: 11px;
+            fill: #444;
+            font-weight: bold;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            pointer-events: none;
+        }
+
+        
+        .node {
+            cursor: pointer;
+            transition: opacity 0.2s ease-out;
+        }
+        .node-name {
+            font-weight: bold;
+            fill: #333;
+            text-shadow: 0 1px 2px #fff;
+            pointer-events: none;
+        }
+
+        
+        .tooltip {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            
+           
+            pointer-events: none; 
+            
+            opacity: 0;
+            transition: opacity 0.15s ease-out; 
+            max-width: 240px;
+            z-index: 1000;
+            font-size: 13px;
+            border-left: 6px solid #ccc;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>🦊 疯狂动物城 · 角色羁绊网 🐰</h1>
+        <div class="legend">
+            <div class="legend-item"><div class="dot" style="background:#ff9f43"></div>主角</div>
+            <div class="legend-item"><div class="dot" style="background:#0984e3"></div>警方</div>
+            <div class="legend-item"><div class="dot" style="background:#9c88ff"></div>政界</div>
+            <div class="legend-item"><div class="dot" style="background:#ff4757"></div>黑帮</div>
+            <div class="legend-item"><div class="dot" style="background:#00b894"></div>市民</div>
+            <div class="legend-item"><div class="dot" style="background:#ff7675"></div>家人</div>
+        </div>
+    </div>
+
+    <div id="chart"></div>
+    <div id="tooltip" class="tooltip"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+       
+        const data = {
+            nodes: [
+                { id: "朱迪", emoji: "🐰", group: "主角", size: 65, desc: "永远乐观的兔子警官" },
+                { id: "尼克", emoji: "🦊", group: "主角", size: 65, desc: "狡猾但善良的狐狸" },
+                { id: "牛局长", emoji: "🐃", group: "警方", size: 50, desc: "外冷内热的警局一把手" },
+                { id: "豹警官", emoji: "🐆", group: "警方", size: 45, desc: "前台接待，喜欢甜甜圈" },
+                { id: "麦克格拉", emoji: "🦏", group: "警方", size: 40, desc: "强壮的犀牛警官" },
+                { id: "狮市长", emoji: "🦁", group: "政界", size: 50, desc: "为了大局隐瞒真相" },
+                { id: "羊副市长", emoji: "🐑", group: "政界", size: 55, desc: "幕后黑手" },
+                { id: "道格", emoji: "🐏", group: "政界", size: 35, desc: "地下制毒师" },
+                { id: "大先生", emoji: "🐭", group: "黑帮", size: 45, desc: "冻原镇教父(鼩鼱)" },
+                { id: "露露", emoji: "🐁", group: "黑帮", size: 40, desc: "大先生的女儿" },
+                { id: "北极熊", emoji: "🐻‍❄️", group: "黑帮", size: 40, desc: "黑帮保镖" },
+                { id: "闪电", emoji: "🦥", group: "市民", size: 45, desc: "车管所...办...事...员" },
+                { id: "威斯顿", emoji: "🦦", group: "市民", size: 35, desc: "卖盗版碟的黄鼠狼" },
+                { id: "奥特顿夫人", emoji: "🦦", group: "市民", size: 35, desc: "寻找丈夫的水獭" },
+                { id: "芬尼克", emoji: "🦊", group: "市民", size: 35, desc: "装宝宝诈骗的搭档" },
+                { id: "吉迪恩", emoji: "🦊", group: "市民", size: 30, desc: "儿时恶霸，已和解" },
+                { id: "夏奇羊", emoji: "🎤", group: "市民", size: 50, desc: "全民偶像" },
+                { id: "邦尼", emoji: "🐰", group: "家人", size: 30, desc: "朱迪母亲" },
+                { id: "斯图", emoji: "🐰", group: "家人", size: 30, desc: "朱迪父亲" }
+            ],
+            links: [
+                { source: "朱迪", target: "尼克", label: "最佳拍档" },
+                { source: "牛局长", target: "朱迪", label: "上下级" },
+                { source: "豹警官", target: "朱迪", label: "迷弟" },
+                { source: "豹警官", target: "牛局长", label: "下属" },
+                { source: "麦克格拉", target: "牛局长", label: "听命" },
+                { source: "奥特顿夫人", target: "朱迪", label: "委托寻找" },
+                { source: "尼克", target: "闪电", label: "老相识" },
+                { source: "朱迪", target: "大先生", label: "被抓/报恩" },
+                { source: "露露", target: "朱迪", label: "救命恩人" },
+                { source: "大先生", target: "露露", label: "父女" },
+                { source: "大先生", target: "尼克", label: "旧怨" },
+                { source: "大先生", target: "北极熊", label: "雇佣" },
+                { source: "羊副市长", target: "狮市长", label: "陷害/篡位" },
+                { source: "狮市长", target: "羊副市长", label: "霸凌" },
+                { source: "羊副市长", target: "道格", label: "指使制毒" },
+                { source: "羊副市长", target: "朱迪", label: "利用" },
+                { source: "朱迪", target: "威斯顿", label: "抓捕" },
+                { source: "威斯顿", target: "道格", label: "供出线索" },
+                { source: "尼克", target: "芬尼克", label: "诈骗搭档" },
+                { source: "朱迪", target: "吉迪恩", label: "和解" },
+                { source: "豹警官", target: "夏奇羊", label: "狂热粉" },
+                { source: "夏奇羊", target: "牛局长", label: "APP好友" },
+                { source: "邦尼", target: "朱迪", label: "母女" },
+                { source: "斯图", target: "朱迪", label: "父女" },
+                { source: "斯图", target: "邦尼", label: "夫妻" }
+            ]
+        };
+
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        const svg = d3.select("#chart").append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height])
+           
+            .on("click", resetHighlight);
+
+       
+        const colorScale = d3.scaleOrdinal()
+            .domain(["主角", "警方", "政界", "黑帮", "市民", "家人"])
+            .range(["#ff9f43", "#0984e3", "#9c88ff", "#ff4757", "#00b894", "#ff7675"]);
+
+        
+        const simulation = d3.forceSimulation(data.nodes)
+            .force("link", d3.forceLink(data.links).id(d => d.id).distance(180)) 
+            .force("charge", d3.forceManyBody().strength(-600))
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            .force("collide", d3.forceCollide().radius(d => d.size + 20));
+
+        
+        
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(data.links)
+            .join("line")
+            .attr("class", "link")
+            .attr("stroke", "#666") 
+            .attr("stroke-opacity", 0.6) 
+            .attr("stroke-width", 1.5);
+
+        const linkLabelGroup = svg.append("g")
+            .selectAll("g")
+            .data(data.links)
+            .join("g")
+            .attr("class", "link-label-group")
+            .style("opacity", 1); 
+
+        linkLabelGroup.append("rect")
+            .attr("class", "link-label-bg")
+            .attr("height", 20)
+            .attr("rx", 10);
+
+        const labelText = linkLabelGroup.append("text")
+            .attr("class", "link-label")
+            .text(d => d.label);
+        
+        labelText.each(function(d) {
+            const bbox = this.getBBox();
+            d3.select(this.parentNode).select("rect")
+                .attr("width", bbox.width + 16)
+                .attr("x", -bbox.width/2 - 8)
+                .attr("y", -10);
+        });
+
+        const node = svg.append("g")
+            .selectAll(".node")
+            .data(data.nodes)
+            .join("g")
+            .attr("class", "node")
+            .style("opacity", 1)
+            .call(d3.drag()
+                .on("start", dragstarted)
+                .on("drag", dragged)
+                .on("end", dragended));
+
+        node.append("circle")
+            .attr("r", d => d.size)
+            .attr("fill", "#fff")
+            .attr("stroke", d => colorScale(d.group))
+            .attr("stroke-width", 4)
+            .style("filter", "drop-shadow(0 4px 6px rgba(0,0,0,0.1))");
+
+        node.append("text")
+            .text(d => d.emoji)
+            .attr("dy", "0.35em")
+            .attr("text-anchor", "middle")
+            .style("font-size", d => d.size + "px")
+            .style("pointer-events", "none")
+            .style("user-select", "none");
+
+        node.append("text")
+            .attr("class", "node-name")
+            .text(d => d.id)
+            .attr("y", d => d.size + 22)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px");
+
+       
+        simulation.on("tick", () => {
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            linkLabelGroup.attr("transform", d => {
+                const x = (d.source.x + d.target.x) / 2;
+                const y = (d.source.y + d.target.y) / 2;
+                return `translate(${x}, ${y})`;
+            });
+
+            node.attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+
+      
+        const tooltip = d3.select("#tooltip");
+
+       
+        function resetHighlight() {
+         
+            node.style("opacity", 1)
+                .transition().duration(200).attr("transform", d => `translate(${d.x},${d.y}) scale(1)`);
+            
+        
+            link.style("opacity", 1)
+                .attr("stroke", "#666")
+                .attr("stroke-width", 1.5);
+
+            
+            linkLabelGroup.style("opacity", 1)
+                .select("rect")
+                .style("stroke", "#ccc")
+                .style("stroke-width", 1);
+
+            tooltip.style("opacity", 0);
+        }
+
+        node.on("mouseover", function(event, d) {
+     
+            event.stopPropagation();
+
+           
+            const neighborNodeIds = new Set();
+            neighborNodeIds.add(d.id); 
+            
+            data.links.forEach(l => {
+                if (l.source.id === d.id) neighborNodeIds.add(l.target.id);
+                if (l.target.id === d.id) neighborNodeIds.add(l.source.id);
+            });
+
+         
+            node.style("opacity", n => neighborNodeIds.has(n.id) ? 1 : 0.1);
+            link.style("opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.05);
+            linkLabelGroup.style("opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.05);
+
+         
+            link.filter(l => l.source.id === d.id || l.target.id === d.id)
+                .attr("stroke", colorScale(d.group))
+                .attr("stroke-width", 3);
+          
+            linkLabelGroup.filter(l => l.source.id === d.id || l.target.id === d.id)
+                .select("rect")
+                .style("stroke", colorScale(d.group))
+                .style("stroke-width", 2);
+
+            d3.select(this).transition().duration(200).attr("transform", `translate(${d.x},${d.y}) scale(1.15)`);
+
+          
+            tooltip.html(`
+                <strong style="color:${colorScale(d.group)}; font-size:16px">${d.emoji} ${d.id}</strong>
+                <div style="font-size:12px; margin:4px 0; color:#666">${d.group}</div>
+                <div>${d.desc}</div>
+            `)
+            .style("left", (event.pageX + 20) + "px")
+            .style("top", (event.pageY + 20) + "px")
+            .style("border-left-color", colorScale(d.group))
+            .style("opacity", 1);
+        })
+        .on("mouseout", function() {
+        
+            resetHighlight();
+        });
+
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+            d3.select(this).style("cursor", "grabbing");
+        }
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+            d3.select(this).style("cursor", "grab");
+        }
+
+    </script>
+</body>
+</html>

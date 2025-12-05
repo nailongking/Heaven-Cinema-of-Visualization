@@ -1,0 +1,481 @@
+{
+  "name": "Anime Universe",
+  "children": [
+    {
+      "name": "宫崎骏",
+      "children": [
+        {
+          "name": "千与千寻",
+          "rating": 9.4,
+          "rank": 5,
+          "poster": "haobao/5_千与千寻_p2557573348.webp",
+          "quote": "",
+          "year": "2001",
+          "value": 1
+        },
+        {
+          "name": "龙猫",
+          "rating": 9.2,
+          "rank": 28,
+          "poster": "haobao/28_龙猫_p2540924496.webp",
+          "quote": "",
+          "year": "1988",
+          "value": 1
+        },
+        {
+          "name": "哈尔的移动城堡",
+          "rating": 9.1,
+          "rank": 37,
+          "poster": "haobao/37_哈尔的移动城堡_p2907583906.webp",
+          "quote": "",
+          "year": "2004",
+          "value": 1
+        },
+        {
+          "name": "天空之城",
+          "rating": 9.2,
+          "rank": 42,
+          "poster": "haobao/42_天空之城_p2892409201.webp",
+          "quote": "",
+          "year": "1986",
+          "value": 1
+        },
+        {
+          "name": "幽灵公主",
+          "rating": 8.9,
+          "rank": 102,
+          "poster": "haobao/102_幽灵公主_p2920895053.webp",
+          "quote": "",
+          "year": "1997",
+          "value": 1
+        },
+        {
+          "name": "风之谷",
+          "rating": 8.9,
+          "rank": 181,
+          "poster": "haobao/181_风之谷_p1917567652.webp",
+          "quote": "",
+          "year": "1984",
+          "value": 1
+        },
+        {
+          "name": "魔女宅急便",
+          "rating": 8.7,
+          "rank": 197,
+          "poster": "haobao/197_魔女宅急便_p456676352.webp",
+          "quote": "",
+          "year": "1989",
+          "value": 1
+        },
+        {
+          "name": "崖上的波妞",
+          "rating": 8.6,
+          "rank": 226,
+          "poster": "haobao/226_崖上的波妞_p2627847859.webp",
+          "quote": "",
+          "year": "2008",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "拜伦·霍华德",
+      "children": [
+        {
+          "name": "疯狂动物城",
+          "rating": 9.3,
+          "rank": 14,
+          "poster": "haobao/14_疯狂动物城_p2924128964.webp",
+          "quote": "",
+          "year": "2016",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "安德鲁·斯坦顿",
+      "children": [
+        {
+          "name": "机器人总动员",
+          "rating": 9.3,
+          "rank": 16,
+          "poster": "haobao/16_机器人总动员_p1461851991.webp",
+          "quote": "",
+          "year": "2008",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "李·昂克里奇",
+      "children": [
+        {
+          "name": "寻梦环游记",
+          "rating": 9.1,
+          "rank": 22,
+          "poster": "haobao/22_寻梦环游记_p2505426431.webp",
+          "quote": "",
+          "year": "2017",
+          "value": 1
+        },
+        {
+          "name": "玩具总动员3",
+          "rating": 8.9,
+          "rank": 137,
+          "poster": "haobao/137_玩具总动员3_p1283675359.webp",
+          "quote": "",
+          "year": "2010",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "彼特·道格特",
+      "children": [
+        {
+          "name": "飞屋环游记",
+          "rating": 9.1,
+          "rank": 35,
+          "poster": "haobao/35_飞屋环游记_p2553594918.webp",
+          "quote": "",
+          "year": "2009",
+          "value": 1
+        },
+        {
+          "name": "头脑特工队",
+          "rating": 8.8,
+          "rank": 117,
+          "poster": "haobao/117_头脑特工队_p2874927470.webp",
+          "quote": "",
+          "year": "2015",
+          "value": 1
+        },
+        {
+          "name": "怪兽电力公司",
+          "rating": 8.8,
+          "rank": 138,
+          "poster": "haobao/138_怪兽电力公司_p2513247938.webp",
+          "quote": "",
+          "year": "2001",
+          "value": 1
+        },
+        {
+          "name": "心灵奇旅",
+          "rating": 8.7,
+          "rank": 164,
+          "poster": "haobao/164_心灵奇旅_p2595591069.webp",
+          "quote": "",
+          "year": "2020",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "Roger",
+      "children": [
+        {
+          "name": "狮子王",
+          "rating": 9.1,
+          "rank": 58,
+          "poster": "haobao/58_狮子王_p726659067.webp",
+          "quote": "",
+          "year": "1994",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "今敏",
+      "children": [
+        {
+          "name": "红辣椒",
+          "rating": 9.0,
+          "rank": 98,
+          "poster": "haobao/98_红辣椒_p2794776839.webp",
+          "quote": "",
+          "year": "2006",
+          "value": 1
+        },
+        {
+          "name": "未麻的部屋",
+          "rating": 9.1,
+          "rank": 115,
+          "poster": "haobao/115_未麻的部屋_p1351050722.webp",
+          "quote": "",
+          "year": "1997",
+          "value": 1
+        },
+        {
+          "name": "东京教父",
+          "rating": 9.0,
+          "rank": 196,
+          "poster": "haobao/196_东京教父_p456703618.webp",
+          "quote": "",
+          "year": "2003",
+          "value": 1
+        },
+        {
+          "name": "千年女优",
+          "rating": 8.8,
+          "rank": 239,
+          "poster": "haobao/239_千年女优_p2215102596.webp",
+          "quote": "",
+          "year": "2001",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "唐·霍尔",
+      "children": [
+        {
+          "name": "超能陆战队",
+          "rating": 8.8,
+          "rank": 108,
+          "poster": "haobao/108_超能陆战队_p2224568669.webp",
+          "quote": "",
+          "year": "2014",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "米林宏昌",
+      "children": [
+        {
+          "name": "借东西的小人阿莉埃蒂",
+          "rating": 8.9,
+          "rank": 119,
+          "poster": "haobao/119_借东西的小人阿莉埃蒂_p617533616.webp",
+          "quote": "",
+          "year": "2010",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "迪恩·德布洛斯",
+      "children": [
+        {
+          "name": "驯龙高手",
+          "rating": 8.8,
+          "rank": 128,
+          "poster": "haobao/128_驯龙高手_p2210954024.webp",
+          "quote": "",
+          "year": "2010",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "近藤喜文",
+      "children": [
+        {
+          "name": "侧耳倾听",
+          "rating": 8.9,
+          "rank": 140,
+          "poster": "haobao/140_侧耳倾听_p456692072.webp",
+          "quote": "",
+          "year": "1995",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "王树忱",
+      "children": [
+        {
+          "name": "哪吒闹海",
+          "rating": 9.2,
+          "rank": 143,
+          "poster": "haobao/143_哪吒闹海_p2532803206.webp",
+          "quote": "",
+          "year": "1979",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "皮艾尔·柯芬",
+      "children": [
+        {
+          "name": "神偷奶爸",
+          "rating": 8.7,
+          "rank": 149,
+          "poster": "haobao/149_神偷奶爸_p792776858.webp",
+          "quote": "",
+          "year": "2010",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "大森贵弘",
+      "children": [
+        {
+          "name": "萤火之森",
+          "rating": 8.8,
+          "rank": 150,
+          "poster": "haobao/150_萤火之森_p1675053073.webp",
+          "quote": "",
+          "year": "2011",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "亚当·艾略特",
+      "children": [
+        {
+          "name": "玛丽和麦克斯",
+          "rating": 9.0,
+          "rank": 153,
+          "poster": "haobao/153_玛丽和麦克斯_p2923412445.webp",
+          "quote": "",
+          "year": "2009",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "新海诚",
+      "children": [
+        {
+          "name": "你的名字。",
+          "rating": 8.5,
+          "rank": 161,
+          "poster": "haobao/161_你的名字。_p2910701461.webp",
+          "quote": "",
+          "year": "2016",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "科克·德·米科",
+      "children": [
+        {
+          "name": "疯狂原始人",
+          "rating": 8.7,
+          "rank": 174,
+          "poster": "haobao/174_疯狂原始人_p1867084027.webp",
+          "quote": "",
+          "year": "2013",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "巴勃罗·贝格尔",
+      "children": [
+        {
+          "name": "机器人之梦",
+          "rating": 9.1,
+          "rank": 187,
+          "poster": "haobao/187_机器人之梦_p2904305126.webp",
+          "quote": "",
+          "year": "2023",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "瑞奇·莫尔",
+      "children": [
+        {
+          "name": "无敌破坏王",
+          "rating": 8.7,
+          "rank": 191,
+          "poster": "haobao/191_无敌破坏王_p1735642656.webp",
+          "quote": "",
+          "year": "2012",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "卡洛斯·沙尔丹哈",
+      "children": [
+        {
+          "name": "冰川时代",
+          "rating": 8.7,
+          "rank": 195,
+          "poster": "haobao/195_冰川时代_p1910895719.webp",
+          "quote": "",
+          "year": "2002",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "藤森雅也",
+      "children": [
+        {
+          "name": "你看起来好像很好吃",
+          "rating": 8.9,
+          "rank": 206,
+          "poster": "haobao/206_你看起来好像很好吃_p709670262.webp",
+          "quote": "",
+          "year": "2010",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "高畑勋",
+      "children": [
+        {
+          "name": "萤火虫之墓",
+          "rating": 8.7,
+          "rank": 241,
+          "poster": "haobao/241_萤火虫之墓_p2237136718.webp",
+          "quote": "",
+          "year": "1988",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "押井守",
+      "children": [
+        {
+          "name": "攻壳机动队",
+          "rating": 9.0,
+          "rank": 243,
+          "poster": "haobao/243_攻壳机动队_p2921045013.webp",
+          "quote": "",
+          "year": "1995",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "鲍勃·佩尔西凯蒂",
+      "children": [
+        {
+          "name": "蜘蛛侠：平行宇宙",
+          "rating": 8.6,
+          "rank": 244,
+          "poster": "haobao/244_蜘蛛侠：平行宇宙_p2535851348.webp",
+          "quote": "",
+          "year": "2018",
+          "value": 1
+        }
+      ]
+    },
+    {
+      "name": "克里斯·巴克",
+      "children": [
+        {
+          "name": "冰雪奇缘",
+          "rating": 8.5,
+          "rank": 245,
+          "poster": "haobao/245_冰雪奇缘_p2151245053.webp",
+          "quote": "",
+          "year": "2013",
+          "value": 1
+        }
+      ]
+    }
+  ]
+}

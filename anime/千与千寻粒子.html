@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>粒子文字 - 千与千寻</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0d0d0d; 
+            font-family: 'SimSun', 'Songti SC', serif; 
+        }
+        #canvas1 {
+            display: block;
+            width: 100%;
+            height: 100vh;
+        }
+        
+        .header {
+            position: absolute;
+            top: 40px; left: 0; width: 100%;
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+        }
+       
+        .header h1 { 
+            margin: 0; 
+            font-weight: normal; 
+            letter-spacing: 10px; 
+            font-size: 20px; 
+            color: rgba(255, 215, 0, 0.8);
+            text-shadow: 0 0 10px rgba(255, 80, 80, 0.5);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>千与千寻 · 经典台词</h1>
+    </div>
+
+    <canvas id="canvas1"></canvas>
+
+    <script>
+       
+        const MOVIE_DATA = {
+            
+            quote: "我不知道\n将去何方，\n但我已在路上" 
+        };
+
+        
+        const POSTER_PALETTE = [
+            'rgb(200, 60, 60)',   
+            'rgb(230, 80, 80)',   
+            'rgb(255, 215, 80)',  
+            'rgb(255, 240, 180)', 
+            'rgb(140, 180, 160)', 
+            'rgb(100, 200, 150)',   
+            'rgb(230, 200, 180)', 
+            'rgb(200, 180, 170)'  
+           
+        ];
+
+        const canvas = document.getElementById('canvas1');
+        const ctx = canvas.getContext('2d');
+        
+        let particleArray = [];
+
+        // 鼠标交互设置
+        const mouse = {
+            x: null,
+            y: null,
+            radius: 150 
+        }
+
+        window.addEventListener('mousemove', function(event){
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                
+                this.size = Math.random() * 1.5 + 1; 
+                this.baseX = x;
+                this.baseY = y;
+                this.density = (Math.random() * 30) + 1;
+                
+                this.color = POSTER_PALETTE[Math.floor(Math.random() * POSTER_PALETTE.length)];
+                
+                this.angle = Math.random() * 360; 
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            update() {
+                
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                let forceDirectionX = dx / distance;
+                let forceDirectionY = dy / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+
+                if (distance < mouse.radius) {
+                    // 粒子被推开
+                    this.x -= directionX * 4; 
+                    this.y -= directionY * 4;
+                } else {
+                    // 粒子回弹
+                    if (this.x !== this.baseX) {
+                        let dx = this.x - this.baseX;
+                        this.x -= dx / 15; 
+                    }
+                    if (this.y !== this.baseY) {
+                        let dy = this.y - this.baseY;
+                        this.y -= dy / 20;
+                    }
+                }
+                
+                
+                this.angle += 0.05;
+                this.x += Math.sin(this.angle) * 0.3; 
+                this.y += Math.cos(this.angle) * 0.3;
+            }
+        }
+
+        
+        function initParticles() {
+            particleArray = [];
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+           
+            ctx.fillStyle = 'white'; 
+            
+           
+            const fontSize = Math.min(canvas.width / 12, 110); 
+            ctx.font = 'bold ' + fontSize + 'px "Songti SC", serif'; 
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            const lines = MOVIE_DATA.quote.split('\n');
+            const lineHeight = fontSize * 1.6; // 行高
+            const startY = (canvas.height - (lines.length * lineHeight)) / 2 + lineHeight/2;
+
+          
+            lines.forEach((line, index) => {
+                ctx.fillText(line, canvas.width/2, startY + (index * lineHeight) - (lines.length * 10)); 
+            });
+
+            
+            const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            
+           
+            const step = 5; 
+
+           
+            for (let y = 0, y2 = textCoordinates.height; y < y2; y += step) {
+                for (let x = 0, x2 = textCoordinates.width; x < x2; x += step) {
+                   
+                    if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 128) {
+                        let positionX = x;
+                        let positionY = y;
+                       
+                        particleArray.push(new Particle(positionX, positionY));
+                    }
+                }
+            }
+        }
+
+       
+        function animate() {
+           
+            ctx.fillStyle = 'rgba(13, 13, 13, 0.2)'; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particleArray.length; i++) {
+                particleArray[i].draw();
+                particleArray[i].update();
+            }
+            requestAnimationFrame(animate);
+        }
+
+       
+        window.addEventListener('resize', function(){
+            initParticles();
+        });
+        
+       
+        window.addEventListener('mouseout', function(){
+            mouse.x = undefined;
+            mouse.y = undefined;
+        });
+
+        // 启动
+        initParticles();
+        animate();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>豆瓣Top250 - 影史巡礼</title>
+    <style>
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #0d1117;
+            background-image: radial-gradient(circle at 50% 40%, #161b22 0%, #0d1117 80%);
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: #c9d1d9;
+            user-select: none;
+        }
+
+       
+        .main-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .fixed-y-axis {
+            width: 60px;
+            height: 100vh;
+            background: #0d1117;
+            border-right: 1px solid #30363d;
+            position: relative;
+            z-index: 50;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.6);
+            flex-shrink: 0;
+        }
+        
+        .y-label {
+            position: absolute; right: 10px; font-size: 12px; color: #8b949e;
+            transform: translateY(-50%); font-weight: bold; font-family: monospace;
+        }
+
+        .scroll-wrapper {
+            flex-grow: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            position: relative;
+            scrollbar-width: none;
+        }
+        .scroll-wrapper::-webkit-scrollbar { display: none; }
+
+        #chart { height: 100vh; transform: translateZ(0); }
+
+        
+        h1 {
+            position: fixed; top: 15px; left: 80px;
+            font-size: 24px; margin: 0; color: #fff;
+            text-shadow: 0 0 10px rgba(0, 181, 29, 0.5);
+            z-index: 60; pointer-events: none; letter-spacing: 1px;
+        }
+        
+        
+        .control-panel {
+            position: fixed;
+            bottom: 20px; left: 80px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(22, 27, 34, 0.85);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid #30363d;
+            z-index: 60;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        #status-text {
+            font-size: 14px;
+            color: #58a6ff;
+            min-width: 160px; 
+        }
+
+       
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 1px solid #444;
+            padding-left: 15px;
+        }
+        
+        .speed-label { font-size: 12px; color: #8b949e; }
+        
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 120px;
+            height: 4px;
+            background: #30363d;
+            border-radius: 2px;
+            outline: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            background: #00B51D; 
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+       
+        .tooltip {
+            position: fixed;
+            padding: 15px 20px;
+            background: rgba(22, 27, 34, 0.98);
+            border: 1px solid #30363d;
+            border-left: 4px solid #00B51D;
+            color: #eee;
+            border-radius: 6px;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            transition: opacity 0.3s ease-out;
+            z-index: 1000;
+            max-width: 280px;
+            line-height: 1.5;
+        }
+        .tooltip strong { font-size: 16px; color: #fff; display: block; margin-bottom: 5px; }
+        .tooltip .rating-tag { color: #ffd700; font-weight: bold; margin-right: 8px; font-size: 16px; }
+        .tooltip .meta { color: #8b949e; margin-bottom: 8px; font-size: 12px; }
+        .tooltip .quote { display: block; margin-top: 10px; padding-top: 10px; border-top: 1px solid #30363d; color: #aaa; font-style: italic; }
+
+        
+        .grid-line-x { stroke: #30363d; stroke-dasharray: 3,3; stroke-width: 1px; }
+        .grid-line-y { stroke: #21262d; stroke-width: 1px; }
+        .grid-text { fill: #30363d; font-size: 50px; font-weight: bold; opacity: 0.5; }
+        .golden-zone { fill: url(#goldGradient); opacity: 0.08; }
+        .poster-placeholder { fill: #161b22; stroke: #30363d; stroke-width: 1px; }
+        
+        .poster-image {
+            opacity: 0; transition: opacity 0.4s ease-in; cursor: pointer;
+        }
+        .poster-image.loaded { opacity: 0.8; }
+        .poster-image:hover { opacity: 1; }
+
+        #loading {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: #58a6ff; background: rgba(0,0,0,0.7); padding: 20px; border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="fixed-y-axis" id="fixedY"></div>
+        <div class="scroll-wrapper" id="scrollContainer">
+            <h1>DOUBAN TOP 250 HISTORY</h1>
+            <div id="chart"></div>
+        </div>
+    </div>
+
+    
+    <div class="control-panel">
+        <div id="status-text">▶ 正在巡航...</div>
+        <div class="speed-control">
+            <span class="speed-label">速度</span>
+            <input type="range" id="speedSlider" min="0" max="5" step="0.5" value="1">
+            <span class="speed-label" id="speedValue">1.0x</span>
+        </div>
+    </div>
+
+    <div id="loading">正在读取数据...</div>
+    <div id="tooltip" class="tooltip"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script>
+        const config = {
+            totalWidth: 6000,
+            posterW: 55,
+            posterH: 82,
+            topPadding: 60,
+            bottomPadding: 80,
+            autoScrollSpeed: 1.0 
+        };
+
+        const container = document.getElementById("chart");
+        const scrollContainer = document.getElementById("scrollContainer");
+        const height = container.clientHeight;
+
+        const svg = d3.select("#chart").append("svg")
+            .attr("width", config.totalWidth).attr("height", height)
+            .on("click", function(event) {
+                if(event.target.tagName === 'svg') resetAndResume();
+            });
+
+       
+        const defs = svg.append("defs");
+        const gradient = defs.append("linearGradient")
+            .attr("id", "goldGradient").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
+        gradient.append("stop").attr("offset", "0%").attr("stop-color", "#ffd700");
+        gradient.append("stop").attr("offset", "100%").attr("stop-color", "transparent");
+
+        
+        let isAutoScrolling = true;
+        let animationFrameId;
+        let activeNode = null;
+
+        
+        d3.json("data.json").then(function(data) {
+            d3.select("#loading").remove();
+
+           
+            const yearExtent = d3.extent(data, d => d.year);
+            const x = d3.scaleLinear().domain([yearExtent[0] - 2, yearExtent[1] + 2]).range([100, config.totalWidth - 300]);
+            const y = d3.scaleLinear().domain([8.0, 9.8]).range([height - config.bottomPadding, config.topPadding]);
+
+            svg.append("rect").attr("x", 0).attr("y", config.topPadding - 20)
+                .attr("width", config.totalWidth).attr("height", y(9.0) - config.topPadding + 20).attr("class", "golden-zone");
+
+            [8.0, 8.5, 9.0, 9.5, 9.7].forEach(r => {
+                svg.append("line").attr("x1", 0).attr("x2", config.totalWidth).attr("y1", y(r)).attr("y2", y(r))
+                    .attr("class", "grid-line-x").style("stroke", r >= 9.0 ? "#58a6ff" : "#30363d")
+                    .style("stroke-opacity", r >= 9.0 ? 0.4 : 0.2).style("stroke-dasharray", r === 9.0 ? "none" : "4,4");
+                const label = document.createElement("div"); label.className = "y-label"; label.innerText = r.toFixed(1);
+                label.style.top = y(r) + "px"; if(r >= 9.5) label.style.color = "#ffd700"; else if(r >= 9.0) label.style.color = "#58a6ff";
+                document.getElementById("fixedY").appendChild(label);
+            });
+
+            for(let yr = Math.ceil(yearExtent[0]/10)*10; yr <= yearExtent[1]; yr += 10) {
+                svg.append("line").attr("x1", x(yr)).attr("x2", x(yr)).attr("y1", config.topPadding).attr("y2", height - config.bottomPadding + 20).attr("class", "grid-line-y");
+                svg.append("text").attr("x", x(yr) + 10).attr("y", height - 30).text(yr + "s").attr("class", "grid-text");
+            }
+
+            const xAxis = d3.axisBottom(x).tickFormat(d3.format("d")).ticks(40).tickSize(0);
+            svg.append("g").attr("transform", `translate(0, ${height - config.bottomPadding})`).call(xAxis)
+                .attr("class", "axis").selectAll("text").style("fill", "#8b949e").style("font-size", "12px").style("font-family", "monospace");
+            svg.selectAll(".domain").remove();
+
+            
+            const simulation = d3.forceSimulation(data)
+                .force("x", d3.forceX(d => x(d.year)).strength(2))
+                .force("y", d3.forceY(d => y(d.rating)).strength(0.3))
+                .force("collide", d3.forceCollide(config.posterW / 2 + 2)).stop();
+            for (let i = 0; i < 150; i++) simulation.tick();
+
+            
+            const nodes = svg.selectAll(".node").data(data).enter().append("g")
+                .attr("class", "node").attr("transform", d => `translate(${d.x},${d.y})`);
+
+            nodes.append("rect").attr("class", "poster-placeholder")
+                .attr("x", -config.posterW/2).attr("y", -config.posterH/2).attr("width", config.posterW).attr("height", config.posterH);
+
+            const images = nodes.append("image")
+                .attr("class", "poster-image")
+                .attr("xlink:href", d => d.poster)
+                .attr("x", -config.posterW / 2).attr("y", -config.posterH / 2)
+                .attr("width", config.posterW).attr("height", config.posterH)
+                .attr("preserveAspectRatio", "cover")
+                .on("load", function() { d3.select(this).classed("loaded", true); })
+                .on("error", function() { d3.select(this).style("display", "none"); })
+                
+                
+                .on("click", function(event, d) {
+                    event.stopPropagation();
+                    const currentImage = d3.select(this);
+                    
+                    if (activeNode && activeNode.node() === this) {
+                        resetAndResume(); return;
+                    }
+                    if (activeNode) resetNodeStyle(activeNode);
+
+                    
+                    isAutoScrolling = false;
+                    updateStatus("❚❚ 已暂停 (点击背景继续)");
+
+                    activeNode = currentImage;
+                    currentImage.transition().duration(300)
+                        .attr("width", config.posterW * 3.5).attr("height", config.posterH * 3.5)
+                        .attr("x", -config.posterW * 1.75).attr("y", -config.posterH * 1.75)
+                        .style("z-index", 999).style("outline", "3px solid #fff")
+                        .style("filter", "drop-shadow(0 10px 30px rgba(0,0,0,0.8))").style("opacity", 1);
+                    d3.select(this.parentNode).raise();
+
+                    const rect = this.getBoundingClientRect();
+                    const tooltip = d3.select("#tooltip");
+                    tooltip.html(`
+                        <span class="rating-tag">★ ${d.rating}</span> No.${d.rank}
+                        <strong>${d.title}</strong>
+                        <div class="meta">${d.year} | ${d.region} | ${d.director}</div>
+                        <div class="meta" style="color:#aaa">${d.genre}</div>
+                        <span class="quote">“${d.quote}”</span>
+                    `)
+                    .style("left", Math.min(rect.right + 20, window.innerWidth - 300) + "px")
+                    .style("top", Math.max(50, rect.top) + "px")
+                    .style("opacity", 1);
+                });
+
+            
+            const slider = document.getElementById('speedSlider');
+            const speedValue = document.getElementById('speedValue');
+
+            slider.addEventListener('input', function() {
+                config.autoScrollSpeed = parseFloat(this.value);
+                speedValue.innerText = config.autoScrollSpeed.toFixed(1) + "x";
+                
+               
+                if (config.autoScrollSpeed > 0 && !activeNode) {
+                    isAutoScrolling = true;
+                    updateStatus("▶ 正在巡航...");
+                } else if (config.autoScrollSpeed === 0) {
+                    isAutoScrolling = false;
+                    updateStatus("❚❚ 速度为0 (停止)");
+                }
+            });
+
+            
+            function autoScroll() {
+                if (isAutoScrolling && config.autoScrollSpeed > 0) {
+                    scrollContainer.scrollLeft += config.autoScrollSpeed;
+                    
+                    
+                    if (scrollContainer.scrollLeft >= (scrollContainer.scrollWidth - scrollContainer.clientWidth)) {
+                        
+                        isAutoScrolling = false;
+                        updateStatus("✔ 已到达终点");
+                    }
+                }
+                requestAnimationFrame(autoScroll);
+            }
+            autoScroll();
+
+           
+            function resetAndResume() {
+                if (activeNode) { resetNodeStyle(activeNode); activeNode = null; }
+                d3.select("#tooltip").style("opacity", 0);
+                
+                if (config.autoScrollSpeed > 0) {
+                    isAutoScrolling = true;
+                    updateStatus("▶ 正在巡航...");
+                }
+            }
+
+            function resetNodeStyle(node) {
+                node.transition().duration(300)
+                    .attr("width", config.posterW).attr("height", config.posterH)
+                    .attr("x", -config.posterW / 2).attr("y", -config.posterH / 2)
+                    .style("outline", "none").style("filter", "none").style("opacity", 0.8);
+            }
+
+            function updateStatus(text) {
+                document.getElementById("status-text").innerText = text;
+            }
+
+            
+            let isDown = false; let startX; let scrollLeft;
+            scrollContainer.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - scrollContainer.offsetLeft; scrollLeft = scrollContainer.scrollLeft; isAutoScrolling = false; updateStatus("❚❚ 手动拖拽中..."); });
+            scrollContainer.addEventListener('mouseleave', () => { isDown = false; });
+            scrollContainer.addEventListener('mouseup', () => { isDown = false; });
+            scrollContainer.addEventListener('mousemove', (e) => { if(!isDown) return; e.preventDefault(); const x = e.pageX - scrollContainer.offsetLeft; const walk = (x - startX) * 2; scrollContainer.scrollLeft = scrollLeft - walk; });
+        });
+    </script>
+</body>
+</html>

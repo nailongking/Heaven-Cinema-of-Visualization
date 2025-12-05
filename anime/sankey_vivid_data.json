@@ -1,0 +1,681 @@
+{
+  "nodes": [
+    {
+      "name": "日本"
+    },
+    {
+      "name": "千与千寻"
+    },
+    {
+      "name": "宫崎骏"
+    },
+    {
+      "name": "美国"
+    },
+    {
+      "name": "疯狂动物城"
+    },
+    {
+      "name": "拜伦·霍华德"
+    },
+    {
+      "name": "机器人总动员"
+    },
+    {
+      "name": "安德鲁·斯坦顿"
+    },
+    {
+      "name": "寻梦环游记"
+    },
+    {
+      "name": "李·昂克里奇"
+    },
+    {
+      "name": "龙猫"
+    },
+    {
+      "name": "飞屋环游记"
+    },
+    {
+      "name": "彼特·道格特"
+    },
+    {
+      "name": "哈尔的移动城堡"
+    },
+    {
+      "name": "天空之城"
+    },
+    {
+      "name": "狮子王"
+    },
+    {
+      "name": "Roger"
+    },
+    {
+      "name": "红辣椒"
+    },
+    {
+      "name": "今敏"
+    },
+    {
+      "name": "幽灵公主"
+    },
+    {
+      "name": "超能陆战队"
+    },
+    {
+      "name": "唐·霍尔"
+    },
+    {
+      "name": "未麻的部屋"
+    },
+    {
+      "name": "头脑特工队"
+    },
+    {
+      "name": "借东西的小人阿莉埃蒂"
+    },
+    {
+      "name": "米林宏昌"
+    },
+    {
+      "name": "驯龙高手"
+    },
+    {
+      "name": "迪恩·德布洛斯"
+    },
+    {
+      "name": "玩具总动员3"
+    },
+    {
+      "name": "怪兽电力公司"
+    },
+    {
+      "name": "侧耳倾听"
+    },
+    {
+      "name": "近藤喜文"
+    },
+    {
+      "name": "中国"
+    },
+    {
+      "name": "哪吒闹海"
+    },
+    {
+      "name": "王树忱"
+    },
+    {
+      "name": "神偷奶爸"
+    },
+    {
+      "name": "皮艾尔·柯芬"
+    },
+    {
+      "name": "萤火之森"
+    },
+    {
+      "name": "大森贵弘"
+    },
+    {
+      "name": "澳大利亚"
+    },
+    {
+      "name": "玛丽和麦克斯"
+    },
+    {
+      "name": "亚当·艾略特"
+    },
+    {
+      "name": "你的名字。"
+    },
+    {
+      "name": "新海诚"
+    },
+    {
+      "name": "心灵奇旅"
+    },
+    {
+      "name": "疯狂原始人"
+    },
+    {
+      "name": "科克·德·米科"
+    },
+    {
+      "name": "风之谷"
+    },
+    {
+      "name": "西班牙"
+    },
+    {
+      "name": "机器人之梦"
+    },
+    {
+      "name": "巴勃罗·贝格尔"
+    },
+    {
+      "name": "无敌破坏王"
+    },
+    {
+      "name": "瑞奇·莫尔"
+    },
+    {
+      "name": "冰川时代"
+    },
+    {
+      "name": "卡洛斯·沙尔丹哈"
+    },
+    {
+      "name": "东京教父"
+    },
+    {
+      "name": "魔女宅急便"
+    },
+    {
+      "name": "你看起来好像很好吃"
+    },
+    {
+      "name": "藤森雅也"
+    },
+    {
+      "name": "崖上的波妞"
+    },
+    {
+      "name": "千年女优"
+    },
+    {
+      "name": "萤火虫之墓"
+    },
+    {
+      "name": "高畑勋"
+    },
+    {
+      "name": "攻壳机动队"
+    },
+    {
+      "name": "押井守"
+    },
+    {
+      "name": "蜘蛛侠：平行宇宙"
+    },
+    {
+      "name": "鲍勃·佩尔西凯蒂"
+    },
+    {
+      "name": "冰雪奇缘"
+    },
+    {
+      "name": "克里斯·巴克"
+    }
+  ],
+  "links": [
+    {
+      "source": 0,
+      "target": 1,
+      "value": 4.645442418951101,
+      "rating": 9.4
+    },
+    {
+      "source": 1,
+      "target": 2,
+      "value": 4.645442418951101,
+      "rating": 9.4
+    },
+    {
+      "source": 3,
+      "target": 4,
+      "value": 3.3564550316256563,
+      "rating": 9.3
+    },
+    {
+      "source": 4,
+      "target": 5,
+      "value": 3.3564550316256563,
+      "rating": 9.3
+    },
+    {
+      "source": 3,
+      "target": 6,
+      "value": 3.3564550316256563,
+      "rating": 9.3
+    },
+    {
+      "source": 6,
+      "target": 7,
+      "value": 3.3564550316256563,
+      "rating": 9.3
+    },
+    {
+      "source": 3,
+      "target": 8,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 8,
+      "target": 9,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 0,
+      "target": 10,
+      "value": 2.371514990485419,
+      "rating": 9.2
+    },
+    {
+      "source": 10,
+      "target": 2,
+      "value": 2.371514990485419,
+      "rating": 9.2
+    },
+    {
+      "source": 3,
+      "target": 11,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 11,
+      "target": 12,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 0,
+      "target": 13,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 13,
+      "target": 2,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 0,
+      "target": 14,
+      "value": 2.371514990485419,
+      "rating": 9.2
+    },
+    {
+      "source": 14,
+      "target": 2,
+      "value": 2.371514990485419,
+      "rating": 9.2
+    },
+    {
+      "source": 3,
+      "target": 15,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 15,
+      "target": 16,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 0,
+      "target": 17,
+      "value": 1.1,
+      "rating": 9.0
+    },
+    {
+      "source": 17,
+      "target": 18,
+      "value": 1.1,
+      "rating": 9.0
+    },
+    {
+      "source": 0,
+      "target": 19,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 19,
+      "target": 2,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 3,
+      "target": 20,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 20,
+      "target": 21,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 0,
+      "target": 22,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 22,
+      "target": 18,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 3,
+      "target": 23,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 23,
+      "target": 12,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 0,
+      "target": 24,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 24,
+      "target": 25,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 3,
+      "target": 26,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 26,
+      "target": 27,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 3,
+      "target": 28,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 28,
+      "target": 9,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 3,
+      "target": 29,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 29,
+      "target": 12,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 0,
+      "target": 30,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 30,
+      "target": 31,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 32,
+      "target": 33,
+      "value": 2.371514990485419,
+      "rating": 9.2
+    },
+    {
+      "source": 33,
+      "target": 34,
+      "value": 2.371514990485419,
+      "rating": 9.2
+    },
+    {
+      "source": 3,
+      "target": 35,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 35,
+      "target": 36,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 0,
+      "target": 37,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 37,
+      "target": 38,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 39,
+      "target": 40,
+      "value": 1.1,
+      "rating": 9.0
+    },
+    {
+      "source": 40,
+      "target": 41,
+      "value": 1.1,
+      "rating": 9.0
+    },
+    {
+      "source": 0,
+      "target": 42,
+      "value": 0.14419417382415922,
+      "rating": 8.5
+    },
+    {
+      "source": 42,
+      "target": 43,
+      "value": 0.14419417382415922,
+      "rating": 8.5
+    },
+    {
+      "source": 3,
+      "target": 44,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 44,
+      "target": 12,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 3,
+      "target": 45,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 45,
+      "target": 46,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 0,
+      "target": 47,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 47,
+      "target": 2,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 48,
+      "target": 49,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 49,
+      "target": 50,
+      "value": 1.6355610346059168,
+      "rating": 9.1
+    },
+    {
+      "source": 3,
+      "target": 51,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 51,
+      "target": 52,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 3,
+      "target": 53,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 53,
+      "target": 54,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 0,
+      "target": 55,
+      "value": 1.1,
+      "rating": 9.0
+    },
+    {
+      "source": 55,
+      "target": 18,
+      "value": 1.1,
+      "rating": 9.0
+    },
+    {
+      "source": 0,
+      "target": 56,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 56,
+      "target": 2,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 0,
+      "target": 57,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 57,
+      "target": 58,
+      "value": 0.7224311118509432,
+      "rating": 8.9
+    },
+    {
+      "source": 0,
+      "target": 59,
+      "value": 0.200387728333696,
+      "rating": 8.6
+    },
+    {
+      "source": 59,
+      "target": 2,
+      "value": 0.200387728333696,
+      "rating": 8.6
+    },
+    {
+      "source": 0,
+      "target": 60,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 60,
+      "target": 18,
+      "value": 0.466357377433567,
+      "rating": 8.8
+    },
+    {
+      "source": 0,
+      "target": 61,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 61,
+      "target": 62,
+      "value": 0.30088207237083064,
+      "rating": 8.7
+    },
+    {
+      "source": 0,
+      "target": 63,
+      "value": 1.1,
+      "rating": 9.0
+    },
+    {
+      "source": 63,
+      "target": 64,
+      "value": 1.1,
+      "rating": 9.0
+    },
+    {
+      "source": 3,
+      "target": 65,
+      "value": 0.200387728333696,
+      "rating": 8.6
+    },
+    {
+      "source": 65,
+      "target": 66,
+      "value": 0.200387728333696,
+      "rating": 8.6
+    },
+    {
+      "source": 3,
+      "target": 67,
+      "value": 0.14419417382415922,
+      "rating": 8.5
+    },
+    {
+      "source": 67,
+      "target": 68,
+      "value": 0.14419417382415922,
+      "rating": 8.5
+    }
+  ]
+}

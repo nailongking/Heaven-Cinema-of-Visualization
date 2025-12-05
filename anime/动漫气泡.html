@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>豆瓣Top250 - 动漫万神殿 (交互增强版)</title>
+    <style>
+       
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #050505;
+            
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(76, 29, 149, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 85% 30%, rgba(14, 165, 233, 0.15) 0%, transparent 50%);
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            color: #fff;
+            user-select: none; 
+        }
+
+        h1 {
+            position: fixed;
+            top: 20px; left: 30px;
+            margin: 0;
+            font-size: 28px;
+            color: #fff;
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+        }
+        h1 small { 
+            display: block; 
+            font-size: 13px; 
+            color: #4ade80; 
+            margin-top: 8px; 
+            font-weight: normal;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 4px;
+            width: fit-content;
+        }
+
+        #chart {
+            width: 100vw;
+            height: 100vh;
+            cursor: grab; 
+        }
+        #chart:active {
+            cursor: grabbing;
+        }
+
+     
+        .node--director {
+            fill: rgba(255, 255, 255, 0.02);
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 1px;
+            transition: all 0.4s ease; 
+        }
+     
+        .node--leaf image {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+
+        .label-director {
+            font-size: 18px; 
+            font-weight: 900;
+            text-anchor: middle;
+            pointer-events: none;
+         
+            fill: #fff;
+            stroke: #000;
+            stroke-width: 4px; 
+            paint-order: stroke; 
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            opacity: 0.9;
+        }
+
+      
+        .tooltip {
+            position: fixed;
+            padding: 15px;
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid #334155;
+            border-left: 4px solid #38bdf8; 
+            color: #f1f5f9;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            transition: opacity 0.2s;
+            z-index: 1000;
+            max-width: 280px;
+            backdrop-filter: blur(8px);
+        }
+        .tooltip strong { font-size: 16px; color: #fff; display: block; margin-bottom: 5px;}
+        .tooltip .score { color: #facc15; font-weight: bold; font-size: 18px; margin-right: 8px;}
+        .tooltip .meta { font-size: 12px; color: #94a3b8; margin-bottom: 8px;}
+        .tooltip .quote { border-top: 1px solid #334155; margin-top: 8px; padding-top: 8px; font-style: italic; color: #cbd5e1; font-size: 13px; line-height: 1.4; }
+
+    </style>
+</head>
+<body>
+
+    <h1>
+        ANIME UNIVERSE
+        <small>🖱️ 滚轮缩放 / 拖拽平移 | ✨ 悬停高亮导演</small>
+    </h1>
+    
+    <div id="tooltip" class="tooltip"></div>
+    <div id="chart"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <script>
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        
+      
+        const svg = d3.select("#chart")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("viewBox", [0, 0, width, height]);
+
+       
+        const view = svg.append("g");
+
+        
+        const colorScale = d3.scaleOrdinal(d3.schemeSpectral[11]); 
+
+        d3.json("anime_data.json").then(function(data) {
+
+           
+            const root = d3.hierarchy(data)
+                .sum(d => d.rating ? Math.pow(d.rating - 7, 3) : 0) 
+                .sort((a, b) => b.value - a.value);
+
+            
+            const pack = d3.pack()
+                .size([width * 1.5, height * 1.5]) 
+                .padding(60); 
+
+            pack(root);
+
+           
+            const initialScale = 0.6; 
+            const offsetX = (width - root.x * 2 * initialScale) / 2;
+            const offsetY = (height - root.y * 2 * initialScale) / 2;
+
+          
+            const nodes = root.descendants();
+
+          
+            const directors = nodes.filter(d => d.depth === 1);
+            
+            const directorGroups = view.selectAll(".director-group")
+                .data(directors)
+                .join("g")
+                .attr("class", "director-group")
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            
+            directorGroups.append("circle")
+                .attr("class", "node--director")
+                .attr("r", d => d.r)
+               
+                .style("stroke", d => d3.color(colorScale(d.data.name)).copy({opacity: 0.3}));
+
+           
+            directorGroups.append("text")
+                .attr("class", "label-director")
+                .attr("y", d => -d.r - 20) 
+                .text(d => d.data.name)
+                .style("fill", d => colorScale(d.data.name)); 
+
+            
+            const movies = nodes.filter(d => !d.children);
+            
+            
+            movies.forEach((d, i) => d.clipId = "clip-" + i);
+            view.append("defs").selectAll("clipPath")
+                .data(movies).join("clipPath")
+                .attr("id", d => d.clipId)
+                .append("circle").attr("r", d => d.r);
+
+            const movieGroups = view.selectAll(".movie-group")
+                .data(movies).join("g")
+                .attr("class", "node--leaf")
+                .attr("transform", d => `translate(${d.x},${d.y})`);
+
+            // 海报图片
+            movieGroups.append("image")
+                .attr("xlink:href", d => d.data.poster)
+                .attr("width", d => d.r * 2)
+                .attr("height", d => d.r * 2)
+                .attr("x", d => -d.r)
+                .attr("y", d => -d.r)
+                .attr("preserveAspectRatio", "xMidYMid slice")
+                .attr("clip-path", d => `url(#${d.clipId})`)
+                .style("opacity", 0.9);
+            
+            // 装饰边框
+            movieGroups.append("circle")
+                .attr("r", d => d.r)
+                .style("fill", "none")
+                .style("stroke", "#fff")
+                .style("stroke-width", 1.5)
+                .style("stroke-opacity", 0.2);
+
+
+            
+            const zoom = d3.zoom()
+                .scaleExtent([0.1, 4]) 
+                .on("zoom", (event) => {
+                    view.attr("transform", event.transform);
+                });
+
+            
+            svg.call(zoom)
+               .call(zoom.transform, d3.zoomIdentity.translate(width/2 - root.x * initialScale, height/2 - root.y * initialScale).scale(initialScale));
+
+
+           
+            directorGroups
+                .on("mouseenter", function(event, d) {
+                   
+                    d3.selectAll(".director-group").transition().duration(300).style("opacity", 0.1);
+                    d3.selectAll(".node--leaf").transition().duration(300).style("opacity", 0.1);
+                    
+                  
+                    const currentGroup = d3.select(this);
+                    currentGroup.transition().duration(300).style("opacity", 1);
+                    
+                    
+                    const directorName = d.data.name;
+                    d3.selectAll(".node--leaf")
+                        .filter(m => m.parent.data.name === directorName)
+                        .transition().duration(300)
+                        .style("opacity", 1);
+                        
+                    
+                    currentGroup.select("circle")
+                        .style("stroke", "#fff")
+                        .style("stroke-width", 3)
+                        .style("fill", "rgba(255,255,255,0.05)");
+                })
+                .on("mouseleave", function() {
+                    
+                    d3.selectAll(".director-group").transition().duration(300).style("opacity", 1);
+                    d3.selectAll(".node--leaf").transition().duration(300).style("opacity", 1);
+                    
+                    d3.select(this).select("circle")
+                        .style("stroke", "rgba(255,255,255,0.1)")
+                        .style("stroke-width", 1)
+                        .style("fill", "rgba(255,255,255,0.02)");
+                });
+
+           
+            movieGroups
+                .on("mouseover", function(event, d) {
+                    
+                    d3.select(this).raise()
+                        .transition().duration(200)
+                        .attr("transform", `translate(${d.x},${d.y}) scale(1.5)`);
+                    
+                    const tooltip = d3.select("#tooltip");
+                    tooltip.html(`
+                        <span class="score">★ ${d.data.rating}</span> No.${d.data.rank}
+                        <strong>${d.data.name}</strong>
+                        <div class="meta">导演: ${d.parent.data.name} | ${d.data.year}</div>
+                        <div class="quote">“${d.data.quote}”</div>
+                    `)
+                    .style("left", (event.pageX + 25) + "px")
+                    .style("top", (event.pageY + 25) + "px")
+                    .style("opacity", 1);
+                })
+                .on("mouseout", function(event, d) {
+                    d3.select(this)
+                        .transition().duration(200)
+                        .attr("transform", `translate(${d.x},${d.y}) scale(1)`);
+                    
+                    d3.select("#tooltip").style("opacity", 0);
+                });
+
+        });
+    </script>
+</body>
+</html>
