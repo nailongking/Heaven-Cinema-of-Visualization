@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>寻梦环游记 - 角色关系与情感可视化</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Microsoft Yahei", sans-serif; }
+        body {
+            /* 背景图片 */
+            background-image: url('https://p26-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/0d6e3e6b1b8b4091a732422ade402d97.jpg~tplv-a9rns2rl98-24-95-exif:1080:1080.image?rcl=202512041434017574E3EB8DC4C311ABF5&rk3s=8e244e95&rrcfp=8a172a1a&x-expires=1765434842&x-signature=SRdC%2B30zmoOm7S5brSdzy%2BJOiUg%3D');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+            /* 关键：body设为flex，让容器垂直+水平居中 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* 半透明遮罩增强可读性 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            z-index: -1;
+        }
+
+        /* 核心容器 - 精准居中，固定宽高比 */
+        .graph-box {
+            width: 90vw;   /* 占视口90%宽度 */
+            max-width: 1200px; /* 最大宽度限制 */
+            height: 80vh;  /* 占视口80%高度 */
+            max-height: 800px; /* 最大高度限制 */
+            position: relative;
+            background: rgba(0,0,0,0.15);
+            border-radius: 12px;
+            padding: 15px;
+            /* 确保容器本身在网页正中央 */
+            margin: 0 auto;
+        }
+
+        /* 层级力导图样式 */
+        .link {
+            stroke: #f1c40f;
+            stroke-opacity: 0.8;
+            stroke-width: 2px;
+            stroke-dasharray: 5,3;
+        }
+        .node { cursor: pointer; }
+        .node-living { fill: #2ecc71; } /* 活人-青柠绿（生命） */
+        .node-dead { fill: #9b59b6; }   /* 亡灵-紫（亡灵世界） */
+        .node-core { fill: #e67e22; }   /* 核心角色-橙（主角/关键） */
+        .node-villain { fill: #e74c3c; }/* 反派-红（冲突） */
+        .node-animal { fill: #3498db; } /* 动物角色-蓝（伙伴） */
+        .node-text {
+            font-size: 14px;
+            fill: #fff;
+            text-anchor: middle;
+            pointer-events: none;
+            text-shadow: 0 2px 4px #000;
+        }
+
+        /* 提示框（含情感雷达图） */
+        .tooltip {
+            position: absolute;
+            width: 280px;
+            padding: 15px;
+            background: rgba(0,0,0,0.9);
+            color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px #f1c40f;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 100;
+        }
+        .tooltip h3 {
+            color: #f1c40f;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .tooltip .radar-box {
+            width: 250px;
+            height: 150px;
+            margin: 0 auto;
+        }
+        .tooltip-desc {
+            margin-top: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <!-- 核心可视化容器 -->
+    <div class="graph-box" id="graph-container"></div>
+
+    <script>
+        // 1. 初始化画布（适配容器尺寸）
+        const container = d3.select("#graph-container");
+        const width = container.node().clientWidth;
+        const height = container.node().clientHeight;
+
+        const svg = container.append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            // SVG内部也居中对齐
+            .attr("viewBox", `0 0 ${width} ${height}`)
+            .attr("preserveAspectRatio", "xMidYMid meet");
+
+        // 2. 扩展角色数据（新增8个角色，总计16个）
+        // 层级划分：
+        // 活人层（0-200）：米格家族活人成员
+        // 核心层（200-400）：主角+核心亡灵
+        // 反派/重要亡灵层（400-600）：德拉库斯及关联角色
+        // 边缘层（600-750）：次要亡灵/辅助角色
+        const nodes = [
+            // 原有核心角色
+            { id: 1, name: "米格", type: "core", y: 100,
+              desc: "12岁男孩，热爱音乐，打破家族禁令，连接两个世界",
+              emotion: {亲情: 90,音乐: 95,记忆: 80,勇气: 90,和解: 85} },
+            { id: 2, name: "可可", type: "living", y: 150,
+              desc: "米格曾祖母，记忆的载体，埃克托存在的最后希望",
+              emotion: {亲情: 98,音乐: 70,记忆: 95,勇气: 60,和解: 80} },
+            { id: 3, name: "埃克托", type: "core", y: 250,
+              desc: "米格曾曾祖父，亡灵乐手，被德拉库斯杀害，渴望被记住",
+              emotion: {亲情: 95,音乐: 90,记忆: 85,勇气: 75,和解: 90} },
+            { id: 4, name: "伊梅尔达", type: "core", y: 300,
+              desc: "米格曾曾祖母，亡灵家族领袖，从禁止音乐到和解",
+              emotion: {亲情: 92,音乐: 60,记忆: 88,勇气: 85,和解: 95} },
+            { id: 5, name: "德拉库斯", type: "villain", y: 400,
+              desc: "伪善的音乐巨星，杀害埃克托，最终被遗忘",
+              emotion: {亲情: 10,音乐: 80,记忆: 75,勇气: 60,和解: 0} },
+            { id: 6, name: "梅尔达奶奶", type: "living", y: 120,
+              desc: "执行家族禁令，最终理解米格的音乐梦想",
+              emotion: {亲情: 88,音乐: 40,记忆: 70,勇气: 75,和解: 85} },
+            { id: 7, name: "胡里奥", type: "dead", y: 350,
+              desc: "伊梅尔达第二任丈夫，默默守护家族",
+              emotion: {亲情: 85,音乐: 50,记忆: 75,勇气: 70,和解: 90} },
+            { id: 8, name: "查尔丘阿潘", type: "dead", y: 450,
+              desc: "埃克托的朋友，亡灵向导，见证米格的寻亲之路",
+              emotion: {亲情: 70,音乐: 65,记忆: 60,勇气: 80,和解: 85} },
+
+            // 新增角色
+            { id: 9, name: "丹丹", type: "animal", y: 200,
+              desc: "无毛犬，米格在亡灵世界的忠实伙伴，指引寻亲之路",
+              emotion: {亲情: 85,忠诚: 98,勇气: 90,陪伴: 95,智慧: 70} },
+            { id: 10, name: "贝托", type: "living", y: 80,
+              desc: "米格的表哥，支持米格的音乐梦想，暗中帮助米格",
+              emotion: {亲情: 80,音乐: 75,勇气: 70,友情: 85,和解: 80} },
+            { id: 11, name: "恩里克", type: "living", y: 90,
+              desc: "米格的叔叔，家族中少数理解音乐重要性的成员",
+              emotion: {亲情: 82,音乐: 65,记忆: 75,勇气: 78,和解: 88} },
+            { id: 12, name: "托雷斯", type: "dead", y: 500,
+              desc: "亡灵界行政官，负责亡灵通行证审核，坚守规则但有温度",
+              emotion: {规则: 90,公正: 85,亲情: 60,勇气: 75,和解: 70} },
+            { id: 13, name: "桑塔克鲁兹", type: "dead", y: 420,
+              desc: "德拉库斯的狂热粉丝兼助手，助纣为虐最终醒悟",
+              emotion: {崇拜: 85,亲情: 20,勇气: 40,悔悟: 70,和解: 60} },
+            { id: 14, name: "路易斯", type: "dead", y: 550,
+              desc: "伊梅尔达的弟弟，亡灵家族成员，擅长制作万寿菊桥",
+              emotion: {亲情: 88,手艺: 90,记忆: 80,勇气: 65,和解: 90} },
+            { id: 15, name: "罗西塔", type: "dead", y: 580,
+              desc: "米格的曾姑婆，亡灵家族长辈，守护家族记忆",
+              emotion: {亲情: 90,记忆: 88,音乐: 55,勇气: 60,和解: 85} },
+            { id: 16, name: "马努埃尔", type: "dead", y: 600,
+              desc: "德拉库斯乐队成员，知晓谋杀真相却选择沉默",
+              emotion: {恐惧: 75,音乐: 80,良知: 40,勇气: 30,和解: 50} }
+        ];
+
+        const links = [
+            // 关系
+            { source: 1, target: 2, type: "family" },
+            { source: 1, target: 3, type: "family" },
+            { source: 1, target: 4, type: "family" },
+            { source: 1, target: 6, type: "family" },
+            { source: 2, target: 3, type: "family" },
+            { source: 3, target: 4, type: "family" },
+            { source: 3, target: 5, type: "conflict" },
+            { source: 3, target: 8, type: "friend" },
+            { source: 4, target: 7, type: "family" },
+            { source: 1, target: 9, type: "friend" },
+            { source: 1, target: 10, type: "family" },
+            { source: 1, target: 11, type: "family" },
+            { source: 4, target: 12, type: "official" },
+            { source: 4, target: 14, type: "family" },
+            { source: 4, target: 15, type: "family" },
+            { source: 5, target: 13, type: "follow" },
+            { source: 5, target: 16, type: "partner" },
+            { source: 8, target: 12, type: "friend" },
+            { source: 9, target: 8, type: "friend" },
+            { source: 13, target: 16, type: "partner" },
+            { source: 14, target: 15, type: "family" }
+        ];
+
+        // 3. 力导向模拟
+        const simulation = d3.forceSimulation(nodes)
+            .force("link", d3.forceLink(links).id(d => d.id)
+                .distance(d => {
+                    // 按关系类型区分距离，适配多节点布局
+                    const distMap = {
+                        family: 120,
+                        conflict: 220,
+                        friend: 140,
+                        official: 180,
+                        follow: 160,
+                        partner: 150
+                    };
+                    return distMap[d.type] || 150;
+                })
+                .strength(0.8) // 增强链接拉力，避免节点分散
+            )
+            .force("charge", d3.forceManyBody().strength(-500)) // 平衡多节点斥力
+            .force("y", d3.forceY(height/2).strength(1.0)) // Y轴强制居中（不再分层，改为整体居中）
+            .force("x", d3.forceX(width/2).strength(1.0))  // X轴强制居中（强度拉满）
+            .force("collision", d3.forceCollide().radius(80)) // 适配多节点的碰撞半径
+            .alphaDecay(0.01) // 减慢收敛速度，让布局更稳定
+            .alpha(1) // 初始活跃度拉满，快速布局
+
+        // 4. 绘制装饰元素（万寿菊路径）
+        svg.append("path")
+            .attr("d", `M${width/2},${height/2-200} Q${width/2+80},${height/2-100} ${width/2},${height/2} Q${width/2-80},${height/2+100} ${width/2},${height/2+200}`)
+            .attr("fill", "none")
+            .attr("stroke", "#f1c40f")
+            .attr("stroke-width", 3)
+            .attr("stroke-opacity", 0.6);
+
+        // 5. 绘制关系链接（区分不同关系颜色）
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(links)
+            .enter().append("line")
+            .attr("class", "link")
+            .attr("stroke", d => {
+                const colorMap = {
+                    family: "#f1c40f",      // 亲情-金黄
+                    conflict: "#e74c3c",    // 冲突-红
+                    friend: "#3498db",      // 友情-蓝
+                    official: "#2ecc71",    // 公务-绿
+                    follow: "#9b59b6",      // 追随-紫
+                    partner: "#e67e22"      // 搭档-橙
+                };
+                return colorMap[d.type] || "#f1c40f";
+            })
+            .attr("stroke-width", d => d.type === "conflict" ? 3 : 2);
+
+        // 6. 绘制放大的角色节点（骷髅/动物形状）
+        // 放大的骷髅路径（适配多节点）
+        const skullPath = "M-40,-25 C-48,0 -48,32 -24,48 C0,64 32,64 56,48 C80,32 80,0 72,-25 C80,-48 48,-64 0,-64 C-48,-64 -80,-48 -40,-25 M-16,-8 C-16,0 -8,8 0,8 C8,8 16,0 16,-8 C16,-16 0,-24 -16,-16 Z";
+        // 小狗形状路径（丹丹专属）
+        const dogPath = "M-30,-10 C-40,0 -40,20 -20,30 C0,40 20,40 40,30 C60,20 60,0 50,-10 C60,-25 40,-40 0,-40 C-40,-40 -60,-25 -30,-10 M-10,5 C-10,10 -5,15 0,15 C5,15 10,10 10,5 C10,0 0,-5 -10,0 Z";
+
+        const node = svg.append("g")
+            .selectAll("path")
+            .data(nodes)
+            .enter().append("path")
+            .attr("d", d => d.type === "animal" ? dogPath : skullPath)
+            .attr("class", d => `node node-${d.type}`)
+            .on("mouseover", showTooltip)
+            .on("mouseout", hideTooltip)
+            .call(d3.drag()
+                .on("start", (e, d) => {
+                    if (!e.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x; d.fy = d.y;
+                })
+                .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+                .on("end", (e, d) => {
+                    if (!e.active) simulation.alphaTarget(0);
+                    d.fx = null; d.fy = null;
+                }));
+
+        // 7. 绘制角色名称
+        const text = svg.append("g")
+            .selectAll("text")
+            .data(nodes)
+            .enter().append("text")
+            .attr("class", "node-text")
+            .attr("dy", d => d.type === "animal" ? 50 : 55) // 适配动物节点
+            .text(d => d.name);
+
+        // 8. 力模拟更新（强制节点在容器中央）
+        simulation.on("tick", () => {
+            // 链接更新
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+
+            // 节点更新（限制在容器中央区域）
+            node
+                .attr("transform", d => {
+                    // 强制节点在容器中央80%的区域内
+                    d.x = Math.max(width*0.1, Math.min(width*0.9, d.x));
+                    d.y = Math.max(height*0.1, Math.min(height*0.9, d.y));
+                    return `translate(${d.x},${d.y})`;
+                });
+
+            // 文本更新
+            text
+                .attr("x", d => d.x)
+                .attr("y", d => d.y);
+        });
+
+        // 9. 增强版提示框（适配新增角色的情感维度）
+        const tooltip = d3.select("body").append("div").attr("class", "tooltip");
+
+        function showTooltip(event, d) {
+            // 高亮当前节点
+            d3.select(this).attr("transform", `translate(${d.x},${d.y}) scale(1.2)`);
+            // 高亮关联链接
+            link.filter(l => l.source.id === d.id || l.target.id === d.id)
+                .attr("stroke-opacity", 1).attr("stroke-width", 4);
+
+            // 绘制提示框
+            tooltip.html(`
+                <h3>${d.name}</h3>
+                <div class="radar-box" id="radar-${d.id}"></div>
+                <div class="tooltip-desc">${d.desc}</div>
+            `)
+            // 提示框位置优化（避免超出屏幕）
+            .style("left", (event.pageX + 10 > window.innerWidth - 300) ?
+                (event.pageX - 290) + "px" : (event.pageX + 10) + "px")
+            .style("top", (event.pageY - 100 < 0) ?
+                (event.pageY + 20) + "px" : (event.pageY - 100) + "px")
+            .style("opacity", 1);
+
+            // 绘制情感雷达图
+            drawRadar(`radar-${d.id}`, d.emotion);
+        }
+
+        function hideTooltip(event, d) {
+            // 恢复节点大小
+            d3.select(this).attr("transform", `translate(${d.x},${d.y}) scale(1)`);
+            // 恢复链接样式
+            link.attr("stroke-opacity", 0.8)
+                .attr("stroke-width", d => d.type === "conflict" ? 3 : 2);
+            // 隐藏提示框
+            tooltip.style("opacity", 0);
+        }
+
+        // 10. 情感雷达图绘制函数（适配新增情感维度）
+        function drawRadar(containerId, emotion) {
+            const radarWidth = 250, radarHeight = 150;
+
+            // 清空原有雷达图（避免重复绘制）
+            d3.select(`#${containerId}`).html("");
+
+            const radarSvg = d3.select(`#${containerId}`).append("svg")
+                .attr("width", radarWidth).attr("height", radarHeight);
+
+            const dimensions = Object.keys(emotion);
+            const numDimensions = dimensions.length;
+            const radius = Math.min(radarWidth/2, radarHeight/2) - 20;
+
+            // 绘制雷达轴
+            const angleSlice = Math.PI * 2 / numDimensions;
+            const scale = d3.scaleLinear().range([0, radius]).domain([0, 100]);
+
+            // 绘制网格线（5层）
+            for (let i = 0; i <= 4; i++) {
+                const r = radius * (i/4);
+                radarSvg.append("polygon")
+                    .attr("points", d3.range(numDimensions).map(j => {
+                        const x = r * Math.cos(angleSlice * j - Math.PI/2);
+                        const y = r * Math.sin(angleSlice * j - Math.PI/2);
+                        return `${radarWidth/2 + x},${radarHeight/2 + y}`;
+                    }).join(" "))
+                    .attr("fill", "rgba(241,196,15,0.1)")
+                    .attr("stroke", "#f1c40f")
+                    .attr("stroke-width", 1);
+            }
+
+            // 绘制维度标签
+            dimensions.forEach((dim, i) => {
+                const x = radius * 1.1 * Math.cos(angleSlice * i - Math.PI/2);
+                const y = radius * 1.1 * Math.sin(angleSlice * i - Math.PI/2);
+                radarSvg.append("text")
+                    .attr("x", radarWidth/2 + x)
+                    .attr("y", radarHeight/2 + y)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "#fff")
+                    .attr("font-size", 12)
+                    .text(dim);
+            });
+
+            // 绘制情感多边形
+            const values = dimensions.map(d => emotion[d]);
+            const path = d3.range(numDimensions).map(i => {
+                const x = scale(values[i]) * Math.cos(angleSlice * i - Math.PI/2);
+                const y = scale(values[i]) * Math.sin(angleSlice * i - Math.PI/2);
+                return `${radarWidth/2 + x},${radarHeight/2 + y}`;
+            }).join(" ");
+
+            radarSvg.append("polygon")
+                .attr("points", path)
+                .attr("fill", "rgba(231,76,60,0.5)")
+                .attr("stroke", "#e74c3c")
+                .attr("stroke-width", 2);
+        }
+    </script>
+</body>
+</html>

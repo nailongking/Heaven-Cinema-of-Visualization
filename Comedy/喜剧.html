@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>喜剧创作多维度可视化</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0f172a;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        /* 固定容器尺寸，避免渲染异常 */
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .chart-card {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            width: calc(50% - 10px);
+            min-width: 350px;
+            height: 420px; /* 固定高度，确保渲染空间 */
+            position: relative;
+            overflow: hidden;
+        }
+        @media (max-width: 768px) {
+            .chart-card { width: 100%; }
+        }
+        /* 图表标题（极简，仅维度名称） */
+        .chart-title {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 16px;
+            color: #facc15;
+            font-weight: 600;
+        }
+        .tooltip {
+            position: fixed; /* 改为fixed，避免跟随滚动异常 */
+            background: rgba(0,0,0,0.9);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 9999;
+            display: none;
+            border-left: 3px solid #facc15;
+            max-width: 200px;
+        }
+        /* 简化动效，提升渲染稳定性 */
+        .dynamic-element { transition: all 0.3s ease; }
+        .dynamic-element:hover { transform: scale(1.05); }
+    </style>
+</head>
+<body>
+    <header class="text-center py-4 mb-10">
+        <h1 class="text-2xl md:text-3xl font-bold text-yellow-400">喜剧创作多维度可视化</h1>
+    </header>
+
+    <div class="chart-container">
+        <!-- 维度1：情绪节奏曲线 -->
+        <div class="chart-card">
+            <div class="chart-title">情绪节奏（笑点+预期违背）</div>
+            <svg id="emotionRhythmChart" width="100%" height="100%"></svg>
+        </div>
+
+        <!-- 维度2：喜剧冲突类型 -->
+        <div class="chart-card">
+            <div class="chart-title">冲突类型占比</div>
+            <svg id="conflictTypeChart" width="100%" height="100%"></svg>
+        </div>
+
+        <!-- 维度3：笑点生成机制 -->
+        <div class="chart-card">
+            <div class="chart-title">笑点机制（强度+频率）</div>
+            <svg id="laughMechanismChart" width="100%" height="100%"></svg>
+        </div>
+
+        <!-- 维度4：喜剧节奏结构 -->
+        <div class="chart-card">
+            <div class="chart-title">节奏结构（铺垫-爆发-收尾）</div>
+            <svg id="rhythmStructureChart" width="100%" height="100%"></svg>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // 1. 情绪节奏数据
+        const emotionRhythmData = {
+            "无厘头喜剧": [
+                { progress: 0, laugh: 0.2, violation: 0.8 },
+                { progress: 20, laugh: 0.9, violation: 0.95 },
+                { progress: 40, laugh: 0.95, violation: 0.9 },
+                { progress: 60, laugh: 0.85, violation: 0.85 },
+                { progress: 80, laugh: 0.9, violation: 0.88 },
+                { progress: 100, laugh: 0.98, violation: 0.92 }
+            ],
+            "黑色幽默": [
+                { progress: 0, laugh: 0.1, violation: 0.4 },
+                { progress: 20, laugh: 0.3, violation: 0.5 },
+                { progress: 40, laugh: 0.35, violation: 0.6 },
+                { progress: 60, laugh: 0.45, violation: 0.7 },
+                { progress: 80, laugh: 0.55, violation: 0.8 },
+                { progress: 100, laugh: 0.7, violation: 0.85 }
+            ],
+            "温情喜剧": [
+                { progress: 0, laugh: 0.1, violation: 0.3 },
+                { progress: 20, laugh: 0.3, violation: 0.4 },
+                { progress: 40, laugh: 0.4, violation: 0.5 },
+                { progress: 60, laugh: 0.5, violation: 0.6 },
+                { progress: 80, laugh: 0.6, violation: 0.7 },
+                { progress: 100, laugh: 0.55, violation: 0.75 }
+            ]
+        };
+
+        // 2. 冲突类型数据
+        const conflictTypeData = [
+            { type: "身份错位", ratio: 0.35, examples: ["唐伯虎点秋香"] },
+            { type: "认知偏差", ratio: 0.28, examples: ["大话西游"] },
+            { type: "情境反差", ratio: 0.20, examples: ["功夫"] },
+            { type: "目标落空", ratio: 0.12, examples: ["泰囧"] },
+            { type: "规则打破", ratio: 0.05, examples: ["东成西就"] }
+        ];
+
+        // 3. 笑点机制数据
+        const laughMechanismData = [
+            { mechanism: "语言梗", intensity: 0.8, frequency: 0.9, type: "无厘头" },
+            { mechanism: "肢体梗", intensity: 0.9, frequency: 0.7, type: "无厘头" },
+            { mechanism: "剧情反转", intensity: 0.7, frequency: 0.6, type: "黑色幽默" },
+            { mechanism: "情感共鸣", intensity: 0.5, frequency: 0.8, type: "温情" },
+            { mechanism: "角色反差", intensity: 0.7, frequency: 0.7, type: "温情" }
+        ];
+
+        // 4. 节奏结构数据
+        const rhythmStructureData = {
+            "无厘头": { 铺垫: 0.1, 爆发: 0.7, 收尾: 0.2 },
+            "黑色幽默": { 铺垫: 0.4, 爆发: 0.3, 收尾: 0.3 },
+            "温情喜剧": { 铺垫: 0.3, 爆发: 0.4, 收尾: 0.3 },
+            "经典均值": { 铺垫: 0.25, 爆发: 0.5, 收尾: 0.25 }
+        };
+
+        // 基础工具函数
+        const tooltip = document.getElementById('tooltip');
+        const showTooltip = (e, content) => {
+            tooltip.style.display = 'block';
+            tooltip.style.left = Math.min(e.pageX + 15, window.innerWidth - 220) + 'px';
+            tooltip.style.top = (e.pageY + 15) + 'px';
+            tooltip.innerHTML = content;
+        };
+        const hideTooltip = () => tooltip.style.display = 'none';
+
+        // 统一配色（避免渲染异常）
+        const colorMap = {
+            "无厘头喜剧": "#facc15", "黑色幽默": "#38bdf8", "温情喜剧": "#4ade80", "经典均值": "#a78bfa",
+            "身份错位": "#facc15", "认知偏差": "#f87171", "情境反差": "#38bdf8", "目标落空": "#4ade80", "规则打破": "#a78bfa",
+            "语言梗": "#facc15", "肢体梗": "#f87171", "剧情反转": "#38bdf8", "情感共鸣": "#4ade80", "角色反差": "#86efac"
+        };
+
+        // ========== 渲染函数：每个图表独立封装，确保顺序执行 ==========
+        // 1. 情绪节奏曲线
+        function renderEmotionRhythm() {
+            const svg = d3.select("#emotionRhythmChart");
+            svg.selectAll("*").remove(); // 强制清空
+            const width = svg.node().clientWidth;
+            const height = svg.node().clientHeight;
+            const margin = { top: 40, right: 30, bottom: 40, left: 50 };
+
+            // 基础比例尺
+            const x = d3.scaleLinear().domain([0, 100]).range([margin.left, width - margin.right]);
+            const y = d3.scaleLinear().domain([0, 1]).range([height - margin.bottom, margin.top]);
+
+            // 坐标轴
+            svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`)
+                .call(d3.axisBottom(x).tickFormat(d => `${d}%`)).attr("color", "#94a3b8");
+            svg.append("g").attr("transform", `translate(${margin.left}, 0)`)
+                .call(d3.axisLeft(y).tickFormat(d => `${d*100}%`)).attr("color", "#94a3b8");
+
+            // 曲线生成器
+            const laughLine = d3.line().x(d => x(d.progress)).y(d => y(d.laugh)).curve(d3.curveCardinal);
+            const violationLine = d3.line().x(d => x(d.progress)).y(d => y(d.violation)).curve(d3.curveCardinal);
+
+            // 绘制曲线（简化动画，避免阻塞）
+            Object.entries(emotionRhythmData).forEach(([type, data], idx) => {
+                // 笑点曲线（实线）
+                svg.append("path").attr("class", "dynamic-element")
+                    .attr("d", laughLine(data))
+                    .attr("fill", "none").attr("stroke", colorMap[type])
+                    .attr("stroke-width", 3).attr("opacity", 1);
+
+                // 预期违背曲线（虚线）
+                svg.append("path").attr("class", "dynamic-element")
+                    .attr("d", violationLine(data))
+                    .attr("fill", "none").attr("stroke", colorMap[type])
+                    .attr("stroke-width", 2).attr("stroke-dasharray", "5,5").attr("opacity", 0.6);
+
+                // 数据点
+                svg.selectAll(`.point-${type}`).data(data).enter()
+                    .append("circle").attr("class", `dynamic-element point-${type}`)
+                    .attr("cx", d => x(d.progress)).attr("cy", d => y(d.laugh))
+                    .attr("r", 5).attr("fill", colorMap[type])
+                    .on("mouseover", (e, d) => showTooltip(e, `
+                        ${type}<br>
+                        笑点: ${(d.laugh*100)}%<br>
+                        预期违背: ${(d.violation*100)}%
+                    `)).on("mouseout", hideTooltip);
+            });
+
+            // 极简图例
+            const legend = svg.append("g").attr("transform", `translate(${width-180}, ${margin.top})`);
+            Object.entries(emotionRhythmData).forEach(([type, _], idx) => {
+                legend.append("circle").attr("cx", 0).attr("cy", idx*25).attr("r", 6).attr("fill", colorMap[type]);
+                legend.append("text").attr("x", 15).attr("y", idx*25 + 4).attr("fill", "#fff").text(type);
+            });
+        }
+
+        // 2. 冲突类型环形图
+        function renderConflictType() {
+            const svg = d3.select("#conflictTypeChart");
+            svg.selectAll("*").remove();
+            const width = svg.node().clientWidth;
+            const height = svg.node().clientHeight;
+            const radius = Math.min(width, height) / 2 - 40;
+            const centerX = width / 2;
+            const centerY = height / 2;
+
+            // 环形图布局
+            const pie = d3.pie().value(d => d.ratio);
+            const arc = d3.arc().innerRadius(radius * 0.4).outerRadius(radius);
+
+            // 绘制环形
+            const g = svg.append("g").attr("transform", `translate(${centerX}, ${centerY})`);
+            g.selectAll(".arc").data(pie(conflictTypeData)).enter()
+                .append("g").attr("class", "arc dynamic-element")
+                .append("path").attr("d", arc)
+                .attr("fill", d => colorMap[d.data.type])
+                .on("mouseover", (e, d) => showTooltip(e, `
+                    冲突类型: ${d.data.type}<br>
+                    占比: ${(d.data.ratio*100)}%<br>
+                    代表: ${d.data.examples[0]}
+                `)).on("mouseout", hideTooltip);
+
+            // 中心文字
+            g.append("text").attr("text-anchor", "middle").attr("dy", 0)
+                .attr("font-size", 14).attr("fill", "#facc15").text("核心冲突");
+            g.append("text").attr("text-anchor", "middle").attr("dy", "1.5em")
+                .attr("font-size", 12).attr("fill", "#94a3b8").text("占比");
+        }
+
+        // 3. 笑点机制散点图
+        function renderLaughMechanism() {
+            const svg = d3.select("#laughMechanismChart");
+            svg.selectAll("*").remove();
+            const width = svg.node().clientWidth;
+            const height = svg.node().clientHeight;
+            const margin = { top: 40, right: 30, bottom: 40, left: 60 };
+
+            // 比例尺
+            const x = d3.scaleLinear().domain([0, 1]).range([margin.left, width - margin.right]);
+            const y = d3.scaleLinear().domain([0, 1]).range([height - margin.bottom, margin.top]);
+            const size = d3.scaleLinear().domain([0, 1]).range([15, 40]);
+
+            // 坐标轴
+            svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`)
+                .call(d3.axisBottom(x).tickFormat(d => `${d*100}%`)).attr("color", "#94a3b8");
+            svg.append("g").attr("transform", `translate(${margin.left}, 0)`)
+                .call(d3.axisLeft(y).tickFormat(d => `${d*100}%`)).attr("color", "#94a3b8");
+
+            // 坐标轴标签
+            svg.append("text").attr("x", width/2).attr("y", height - 10)
+                .attr("text-anchor", "middle").attr("fill", "#94a3b8").text("出现频率");
+            svg.append("text").attr("x", -height/2).attr("y", 15).attr("transform", "rotate(-90)")
+                .attr("text-anchor", "middle").attr("fill", "#94a3b8").text("笑点强度");
+
+            // 散点
+            svg.selectAll(".mechanism-dot").data(laughMechanismData).enter()
+                .append("circle").attr("class", "dynamic-element mechanism-dot")
+                .attr("cx", d => x(d.frequency)).attr("cy", d => y(d.intensity))
+                .attr("r", d => size(d.intensity)).attr("fill", d => colorMap[d.mechanism])
+                .attr("opacity", 0.8).attr("stroke", "#fff").attr("stroke-width", 1)
+                .on("mouseover", (e, d) => showTooltip(e, `
+                    笑点: ${d.mechanism}<br>
+                    适配: ${d.type}<br>
+                    强度: ${(d.intensity*100)}%<br>
+                    频率: ${(d.frequency*100)}%
+                `)).on("mouseout", hideTooltip);
+
+            // 极简标签
+            svg.selectAll(".mechanism-label").data(laughMechanismData).enter()
+                .append("text").attr("x", d => x(d.frequency)+10).attr("y", d => y(d.intensity))
+                .attr("fill", "#fff").attr("font-size", 10).text(d => d.mechanism);
+        }
+
+        // 4. 节奏结构堆叠条形图
+        function renderRhythmStructure() {
+            const svg = d3.select("#rhythmStructureChart");
+            svg.selectAll("*").remove();
+            const width = svg.node().clientWidth;
+            const height = svg.node().clientHeight;
+            const margin = { top: 40, right: 30, bottom: 40, left: 60 };
+
+            // 数据处理
+            const types = Object.keys(rhythmStructureData);
+            const keys = ["铺垫", "爆发", "收尾"];
+            const stack = d3.stack().keys(keys);
+            const stackedData = stack(types.map(type => ({
+                type,
+                铺垫: rhythmStructureData[type].铺垫,
+                爆发: rhythmStructureData[type].爆发,
+                收尾: rhythmStructureData[type].收尾
+            })));
+
+            // 比例尺
+            const x = d3.scaleBand().domain(types).range([margin.left, width - margin.right]).padding(0.2);
+            const y = d3.scaleLinear().domain([0, 1]).range([height - margin.bottom, margin.top]);
+
+            // 颜色
+            const stackColor = d3.scaleOrdinal().domain(keys).range(["#94a3b8", "#facc15", "#4ade80"]);
+
+            // 绘制堆叠条
+            const bars = svg.selectAll(".stack-bar").data(stackedData).enter()
+                .append("g").attr("class", "stack-bar").attr("fill", d => stackColor(d.key));
+
+            bars.selectAll("rect").data(d => d).enter()
+                .append("rect").attr("class", "dynamic-element")
+                .attr("x", d => x(d.data.type)).attr("y", d => y(d[1]))
+                .attr("height", d => y(d[0]) - y(d[1])).attr("width", x.bandwidth())
+                .on("mouseover", (e, d) => {
+                    const key = d3.select(e.currentTarget.parentNode).datum().key;
+                    showTooltip(e, `${d.data.type}<br>${key}: ${((d[1]-d[0])*100).toFixed(0)}%`);
+                }).on("mouseout", hideTooltip);
+
+            // 坐标轴
+            svg.append("g").attr("transform", `translate(0, ${height - margin.bottom})`)
+                .call(d3.axisBottom(x)).attr("color", "#94a3b8");
+            svg.append("g").attr("transform", `translate(${margin.left}, 0)`)
+                .call(d3.axisLeft(y).tickFormat(d => `${d*100}%`)).attr("color", "#94a3b8");
+
+            // 图例
+            const legend = svg.append("g").attr("transform", `translate(${margin.left}, ${margin.top - 20})`);
+            keys.forEach((key, idx) => {
+                legend.append("rect").attr("x", idx * 80).attr("y", 0).attr("width", 15).attr("height", 15).attr("fill", stackColor(key));
+                legend.append("text").attr("x", idx * 80 + 20).attr("y", 12).attr("fill", "#fff").text(key);
+            });
+        }
+
+        // ========== 初始化：按顺序渲染，确保全部加载 ==========
+        window.addEventListener("DOMContentLoaded", () => {
+            // 强制等待DOM完全加载后执行
+            setTimeout(() => {
+                renderEmotionRhythm();
+                setTimeout(renderConflictType, 200); // 延迟200ms，避免渲染冲突
+                setTimeout(renderLaughMechanism, 400);
+                setTimeout(renderRhythmStructure, 600);
+            }, 100);
+
+            // 窗口resize重新渲染
+            window.addEventListener("resize", () => {
+                renderEmotionRhythm();
+                renderConflictType();
+                renderLaughMechanism();
+                renderRhythmStructure();
+            });
+        });
+    </script>
+</body>
+</html>
