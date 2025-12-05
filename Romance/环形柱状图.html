@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>豆瓣高分电影环形图</title>
+  <script src="https://cdn.jsdelivr.net/npm/vega@5" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6" defer></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #1a1a2e;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: auto;
+      position: relative;
+      flex-direction: column;
+    }
+    
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      padding: 20px;
+      position: relative;
+    }
+    
+    #vis-container {
+      width: 1200px;
+      height: 1200px;
+      background: transparent;
+      position: relative;
+      margin: 50px auto;
+    }
+    
+    .type-legend {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(30, 30, 46, 0.85);
+      border: 1px solid rgba(76, 201, 240, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      min-width: 180px;
+    }
+    
+    .type-legend h3 {
+      margin: 0 0 10px 0;
+      color: #4cc9f0;
+      font-size: 14px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid rgba(76, 201, 240, 0.3);
+      padding-bottom: 8px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+      padding: 4px 0;
+    }
+    
+    .color-box {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      margin-right: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .type-info {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .type-name {
+      color: #e0e0e0;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .type-percentage {
+      color: #4cc9f0;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+    
+    .avg-rating {
+      color: #F1C40F;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+    
+    .tooltip {
+      position: absolute;
+      background: rgba(30, 30, 46, 0.95);
+      border: 2px solid #4cc9f0;
+      border-radius: 10px;
+      padding: 15px;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      max-width: 320px;
+      backdrop-filter: blur(5px);
+    }
+    
+    .tooltip h3 {
+      margin: 0 0 10px 0;
+      color: #4cc9f0;
+      font-size: 16px;
+    }
+    
+    .tooltip p {
+      margin: 5px 0;
+    }
+    
+    .tooltip .rating {
+      color: #F1C40F;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .tooltip .box-office {
+      color: #2ECC71;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    
+    .tooltip .genre {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-right: 5px;
+      margin-bottom: 5px;
+    }
+    
+    .tooltip .rank {
+      color: #3498DB;
+      font-weight: bold;
+    }
+    
+    .tooltip .angle {
+      color: #FF6B9D;
+      font-weight: bold;
+    }
+    
+    #circle-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 50;
+      pointer-events: none;
+    }
+    
+    .circle-group {
+      pointer-events: auto;
+    }
+    
+    .rating-circle {
+      transition: r 0.3s ease, filter 0.3s ease;
+    }
+    
+    .box-office-info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(30, 30, 46, 0.85);
+      border: 1px solid rgba(76, 201, 240, 0.3);
+      border-radius: 8px;
+      padding: 15px;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      max-width: 250px;
+    }
+    
+    .box-office-info h3 {
+      margin: 0 0 10px 0;
+      color: #4cc9f0;
+      font-size: 14px;
+      text-align: center;
+      font-weight: bold;
+      border-bottom: 1px solid rgba(76, 201, 240, 0.3);
+      padding-bottom: 8px;
+    }
+    
+    .box-office-info p {
+      margin: 8px 0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    
+    .box-office-key {
+      display: flex;
+      align-items: center;
+      margin: 8px 0;
+    }
+    
+    .box-office-color {
+      width: 20px;
+      height: 4px;
+      margin-right: 10px;
+      background: #2ECC71;
+      border-radius: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="box-office-info">
+    <h3>票房信息说明</h3>
+    <p><strong>柱子高度:</strong> 表示电影票房</p>
+    <p><strong>柱子越高:</strong> 票房越高</p>
+    <p><strong>单位:</strong> 百万美元</p>
+    <div class="box-office-key">
+      <div class="box-office-color"></div>
+      <span>票房数据在悬浮窗中显示</span>
+    </div>
+  </div>
+  
+  <div class="type-legend" id="type-legend">
+    <h3>类型颜色说明</h3>
+    <div id="legend-items"></div>
+  </div>
+  
+  <div class="container">
+    <div id="vis-container">
+    </div>
+  </div>
+  
+  <div id="tooltip" class="tooltip"></div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const movieData = {
+        "爱情": [
+          { name: "泰坦尼克号", rating: 9.5, rank: 3, boxOffice: 2187 },
+          { name: "霸王别姬", rating: 9.6, rank: 2, boxOffice: 45 },
+          { name: "怦然心动", rating: 9.1, rank: 30, boxOffice: 150 },
+          { name: "傲慢与偏见", rating: 8.7, rank: 130, boxOffice: 121 },
+          { name: "爱乐之城", rating: 8.4, rank: 216, boxOffice: 446 },
+          { name: "罗马假日", rating: 9.1, rank: 56, boxOffice: 85 },
+          { name: "情书", rating: 8.9, rank: 66, boxOffice: 38 },
+          { name: "甜蜜蜜", rating: 8.9, rank: 103, boxOffice: 28 },
+          { name: "真爱至上", rating: 8.5, rank: 230, boxOffice: 247 }
+        ],
+        "科幻": [
+          { name: "阿凡达", rating: 8.8, rank: 74, boxOffice: 2923 },
+          { name: "星际穿越", rating: 9.4, rank: 7, boxOffice: 701 },
+          { name: "盗梦空间", rating: 9.4, rank: 9, boxOffice: 836 },
+          { name: "黑客帝国", rating: 9.1, rank: 54, boxOffice: 463 },
+          { name: "千钧一发", rating: 8.8, rank: 227, boxOffice: 12 },
+          { name: "楚门的世界", rating: 9.4, rank: 10, boxOffice: 264 },
+          { name: "2001太空漫游", rating: 8.9, rank: 184, boxOffice: 138 },
+          { name: "火星救援", rating: 8.5, rank: 235, boxOffice: 630 },
+          { name: "源代码", rating: 8.6, rank: 204, boxOffice: 147 }
+        ],
+        "喜剧": [
+          { name: "美丽人生", rating: 9.5, rank: 6, boxOffice: 230 },
+          { name: "三傻大闹宝莱坞", rating: 9.2, rank: 15, boxOffice: 105 },
+          { name: "触不可及", rating: 9.3, rank: 23, boxOffice: 440 },
+          { name: "让子弹飞", rating: 9.0, rank: 36, boxOffice: 110 },
+          { name: "绿皮书", rating: 8.9, rank: 52, boxOffice: 321 },
+          { name: "大话西游之大圣娶亲", rating: 9.2, rank: 20, boxOffice: 68 },
+          { name: "疯狂动物城", rating: 9.3, rank: 14, boxOffice: 1024 },
+          { name: "低俗小说", rating: 8.9, rank: 85, boxOffice: 213 },
+          { name: "虎口脱险", rating: 8.9, rank: 228, boxOffice: 42 }
+        ],
+        "动画": [
+          { name: "千与千寻", rating: 9.4, rank: 5, boxOffice: 395 },
+          { name: "疯狂动物城", rating: 9.3, rank: 14, boxOffice: 1024 },
+          { name: "寻梦环游记", rating: 9.1, rank: 22, boxOffice: 814 },
+          { name: "龙猫", rating: 9.2, rank: 28, boxOffice: 41 },
+          { name: "机器人总动员", rating: 9.3, rank: 16, boxOffice: 521 },
+          { name: "天空之城", rating: 9.2, rank: 42, boxOffice: 58 },
+          { name: "哈尔的移动城堡", rating: 9.1, rank: 37, boxOffice: 235 },
+          { name: "幽灵公主", rating: 8.9, rank: 102, boxOffice: 159 },
+          { name: "风之谷", rating: 8.9, rank: 181, boxOffice: 32 }
+        ],
+        "悬疑": [
+          { name: "盗梦空间", rating: 9.4, rank: 9, boxOffice: 836 },
+          { name: "禁闭岛", rating: 8.9, rank: 82, boxOffice: 294 },
+          { name: "致命魔术", rating: 8.9, rank: 84, boxOffice: 110 },
+          { name: "记忆碎片", rating: 8.7, rank: 188, boxOffice: 40 },
+          { name: "看不见的客人", rating: 8.8, rank: 75, boxOffice: 37 },
+          { name: "致命ID", rating: 8.9, rank: 93, boxOffice: 90 },
+          { name: "蝴蝶效应", rating: 8.9, rank: 81, boxOffice: 96 },
+          { name: "恐怖游轮", rating: 8.5, rank: 193, boxOffice: 8 },
+          { name: "彗星来的那一夜", rating: 8.6, rank: 232, boxOffice: 0.1 }
+        ]
+      };
+
+      const genreColorMap = {
+        "爱情": "#FF6B9D",  // 粉色
+        "科幻": "#3498DB",  // 蓝色
+        "喜剧": "#F1C40F",  // 黄色
+        "动画": "#2ECC71",  // 绿色
+        "悬疑": "#E74C3C"   // 红色
+      };
+
+      const targetGenres = ["爱情", "科幻", "喜剧", "动画", "悬疑"];
+
+      const genreAvgRatings = {};
+      const genreMovieCounts = {};
+      const genreTotalBoxOffice = {};
+      const genreAvgBoxOffice = {};
+      
+      targetGenres.forEach(genre => {
+        const movies = movieData[genre];
+        const avgRating = movies.reduce((sum, movie) => sum + movie.rating, 0) / movies.length;
+        const totalBoxOffice = movies.reduce((sum, movie) => sum + movie.boxOffice, 0);
+        const avgBoxOffice = totalBoxOffice / movies.length;
+        
+        genreAvgRatings[genre] = avgRating.toFixed(2);
+        genreMovieCounts[genre] = movies.length;
+        genreTotalBoxOffice[genre] = totalBoxOffice;
+        genreAvgBoxOffice[genre] = avgBoxOffice.toFixed(1);
+      });
+
+      const genrePercentages = {
+        "爱情": 18.4,
+        "科幻": 15.6,
+        "喜剧": 22.4,
+        "动画": 16.8,
+        "悬疑": 14.8
+      };
+
+      const totalPercentage = Object.values(genrePercentages).reduce((a, b) => a + b, 0);
+      const genreAngles = {};
+      
+      let currentAngle = 0;
+      targetGenres.forEach(genre => {
+        const percentage = genrePercentages[genre];
+        const angle = (percentage / totalPercentage) * 360;
+        genreAngles[genre] = {
+          percentage: percentage.toFixed(1),
+          angle: angle.toFixed(2),
+          startAngle: currentAngle,
+          endAngle: currentAngle + angle,
+          avgRating: genreAvgRatings[genre],
+          movieCount: genreMovieCounts[genre],
+          totalBoxOffice: genreTotalBoxOffice[genre],
+          avgBoxOffice: genreAvgBoxOffice[genre]
+        };
+        currentAngle += angle;
+      });
+
+      function renderTypeLegend() {
+        const legendContainer = document.getElementById('legend-items');
+        
+        targetGenres.forEach(genre => {
+          const legendItem = document.createElement('div');
+          legendItem.className = 'legend-item';
+          legendItem.innerHTML = `
+            <div class="color-box" style="background: ${genreColorMap[genre]}"></div>
+            <div class="type-info">
+              <span class="type-name">${genre}</span>
+              <span class="type-percentage">占比: ${genrePercentages[genre]}%</span>
+              <span class="avg-rating">平均评分: ${genreAvgRatings[genre]}</span>
+              <span style="color: #2ECC71; font-size: 11px; margin-top: 2px;">平均票房: ${genreAvgBoxOffice[genre]}M$</span>
+            </div>
+          `;
+          legendContainer.appendChild(legendItem);
+        });
+      }
+
+
+      function generatePillarData() {
+        const allPillars = [];
+        
+        targetGenres.forEach(genre => {
+          const movies = movieData[genre];
+          const color = genreColorMap[genre];
+          const { angle, startAngle } = genreAngles[genre];
+          
+          const pillarAngleWidth = parseFloat(angle) / movies.length;
+          
+          const maxBoxOfficeInGenre = Math.max(...movies.map(m => m.boxOffice));
+          
+          movies.forEach((movie, index) => {
+            const pillarStartAngle = startAngle + (index * pillarAngleWidth);
+            const pillarEndAngle = pillarStartAngle + pillarAngleWidth;
+            const centerAngle = pillarStartAngle + (pillarAngleWidth / 2);
+            
+            const baseHeight = 25;
+            const normalizedBoxOffice = movie.boxOffice / maxBoxOfficeInGenre;
+            const height = baseHeight * normalizedBoxOffice;
+            
+            allPillars.push({
+              id: `${genre}-${index}`,
+              genre: genre,
+              movieName: movie.name,
+              rating: movie.rating,
+              rank: movie.rank,
+              boxOffice: movie.boxOffice,
+              color: color,
+              height: Math.max(height, 3),
+              startAngle: pillarStartAngle,
+              endAngle: pillarEndAngle,
+              centerAngle: centerAngle,
+              pillarIndex: index + 1,
+              genrePercentage: genrePercentages[genre],
+              genreAngle: parseFloat(angle).toFixed(1),
+              genreAvgRating: genreAvgRatings[genre],
+              genreAvgBoxOffice: genreAvgBoxOffice[genre]
+            });
+          });
+        });
+
+        return allPillars;
+      }
+
+
+      function generateCirclesData() {
+        const circles = [];
+        const centerX = 600; 
+        const centerY = 600; 
+        const baseRadius = 320;  
+        
+        const allAvgRatings = targetGenres.map(genre => parseFloat(genreAvgRatings[genre]));
+        const minRating = Math.min(...allAvgRatings);
+        const maxRating = Math.max(...allAvgRatings);
+        
+        targetGenres.forEach(genre => {
+          const { startAngle, angle } = genreAngles[genre];
+          const color = genreColorMap[genre];
+          const avgRating = parseFloat(genreAvgRatings[genre]);
+          
+          const centerAngle = startAngle + parseFloat(angle) / 2;
+          
+          let offsetDistance = 180; 
+          
+          const angleInRadians = centerAngle * Math.PI / 180;
+          
+          const finalRadius = baseRadius + offsetDistance;
+          
+          const margin = 100; 
+          let x = centerX + finalRadius * Math.cos((centerAngle - 90) * Math.PI / 180);
+          let y = centerY + finalRadius * Math.sin((centerAngle - 90) * Math.PI / 180);
+          
+          const maxSize = 80; 
+          x = Math.max(maxSize + margin, Math.min(1200 - maxSize - margin, x));
+          y = Math.max(maxSize + margin, Math.min(1200 - maxSize - margin, y));
+          
+          const normalizedRating = (avgRating - minRating) / (maxRating - minRating);
+          const size = 25 + normalizedRating * 40; 
+          
+          circles.push({
+            genre: genre,
+            avgRating: avgRating,
+            color: color,
+            centerAngle: centerAngle,
+            x: x,
+            y: y,
+            size: size,
+            originalSize: size,
+            radius: finalRadius,
+            movieCount: genreMovieCounts[genre],
+            totalBoxOffice: genreTotalBoxOffice[genre],
+            avgBoxOffice: genreAvgBoxOffice[genre]
+          });
+        });
+        
+        return circles;
+      }
+
+
+      function drawCirclesWithSVG() {
+        const circlesData = generateCirclesData();
+        const centerX = 600;
+        const centerY = 600;
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('id', 'circle-svg');
+        svg.setAttribute('width', '1200');
+        svg.setAttribute('height', '1200');
+        svg.setAttribute('viewBox', '0 0 1200 1200');
+        svg.style.position = 'absolute';
+        svg.style.top = '0';
+        svg.style.left = '0';
+        svg.style.zIndex = '50';
+        
+        const margin = 120; 
+        const containerWidth = 1200;
+        const containerHeight = 1200;
+        
+        circlesData.forEach(circle => {
+          const circleGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          circleGroup.setAttribute('class', 'circle-group');
+          circleGroup.setAttribute('data-genre', circle.genre);
+          
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          const lineStartRadius = 280; 
+          const lineStartX = centerX + lineStartRadius * Math.cos((circle.centerAngle - 90) * Math.PI / 180);
+          const lineStartY = centerY + lineStartRadius * Math.sin((circle.centerAngle - 90) * Math.PI / 180);
+          
+          const lineEndRadius = circle.size * 0.8;
+          const lineEndX = circle.x + lineEndRadius * Math.cos((circle.centerAngle - 90) * Math.PI / 180);
+          const lineEndY = circle.y + lineEndRadius * Math.sin((circle.centerAngle - 90) * Math.PI / 180);
+          
+          line.setAttribute('x1', lineStartX);
+          line.setAttribute('y1', lineStartY);
+          line.setAttribute('x2', lineEndX);
+          line.setAttribute('y2', lineEndY);
+          line.setAttribute('stroke', circle.color);
+          line.setAttribute('stroke-width', '1.5');
+          line.setAttribute('stroke-dasharray', '5,3');
+          line.setAttribute('stroke-opacity', '0.6');
+          line.setAttribute('pointer-events', 'none');
+          
+          const circleEl = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          circleEl.setAttribute('cx', circle.x);
+          circleEl.setAttribute('cy', circle.y);
+          circleEl.setAttribute('r', circle.size);
+          circleEl.setAttribute('fill', circle.color);
+          circleEl.setAttribute('stroke', 'white');
+          circleEl.setAttribute('stroke-width', '2.5');
+          circleEl.setAttribute('stroke-opacity', '0.8');
+          circleEl.setAttribute('class', 'rating-circle');
+          circleEl.style.cursor = 'pointer';
+          circleEl.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))';
+          
+          const ratingText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          ratingText.setAttribute('x', circle.x);
+          ratingText.setAttribute('y', circle.y);
+          ratingText.setAttribute('text-anchor', 'middle');
+          ratingText.setAttribute('dominant-baseline', 'middle');
+          ratingText.setAttribute('fill', circle.color === '#F1C40F' ? '#000' : '#fff');
+          
+          let fontSize;
+          if (circle.size > 50) fontSize = '18';
+          else if (circle.size > 35) fontSize = '16';
+          else fontSize = '14';
+          
+          ratingText.setAttribute('font-size', fontSize);
+          ratingText.setAttribute('font-weight', 'bold');
+          ratingText.setAttribute('pointer-events', 'none');
+          ratingText.textContent = circle.avgRating.toFixed(2);
+          
+          const genreText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          genreText.setAttribute('x', circle.x);
+          genreText.setAttribute('y', circle.y + circle.size + 30);
+          genreText.setAttribute('text-anchor', 'middle');
+          genreText.setAttribute('fill', circle.color);
+          genreText.setAttribute('font-size', '16');
+          genreText.setAttribute('font-weight', 'bold');
+          genreText.setAttribute('pointer-events', 'none');
+          genreText.textContent = circle.genre;
+          
+          circleEl.addEventListener('mouseover', (e) => {
+            circleEl.setAttribute('r', circle.size * 1.1);
+            circleEl.style.filter = 'drop-shadow(0 6px 12px rgba(0,0,0,0.6))';
+            
+            if (circle.size > 50) ratingText.setAttribute('font-size', '20');
+            else if (circle.size > 35) ratingText.setAttribute('font-size', '18');
+            else ratingText.setAttribute('font-size', '16');
+            
+            showTooltip(e, circle);
+          });
+          
+          circleEl.addEventListener('mouseout', () => {
+            circleEl.setAttribute('r', circle.size);
+            circleEl.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))';
+            ratingText.setAttribute('font-size', fontSize);
+          });
+          
+          circleEl.addEventListener('click', (e) => {
+            showTooltip(e, circle, true);
+          });
+          
+          circleGroup.appendChild(line);
+          circleGroup.appendChild(circleEl);
+          circleGroup.appendChild(ratingText);
+          circleGroup.appendChild(genreText);
+          
+          svg.appendChild(circleGroup);
+        });
+        
+        const visContainer = document.getElementById('vis-container');
+        visContainer.appendChild(svg);
+      }
+
+      function showTooltip(event, datum, isCircle = false) {
+        const tooltip = document.getElementById('tooltip');
+        
+        const x = event.pageX + 15;
+        const y = event.pageY + 15;
+        
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const tooltipWidth = 320;
+        const tooltipHeight = isCircle ? 200 : 240;
+        
+        let finalX = x;
+        let finalY = y;
+        
+        if (x + tooltipWidth > viewportWidth) {
+          finalX = event.pageX - tooltipWidth - 15;
+        }
+        if (y + tooltipHeight > viewportHeight) {
+          finalY = event.pageY - tooltipHeight - 15;
+        }
+        
+        const genreColor = datum.color;
+        const genreStyle = `background: ${genreColor}; color: ${genreColor === '#F1C40F' ? '#000' : '#fff'}`;
+        
+        if (isCircle) {
+          tooltip.innerHTML = `
+            <h3>${datum.genre}类型统计</h3>
+            <p><span class="genre" style="${genreStyle}">${datum.genre}</span></p>
+            <p><strong>平均豆瓣评分:</strong> <span class="rating">${datum.avgRating.toFixed(2)}</span></p>
+            <p><strong>类型占比:</strong> <span class="angle">${genrePercentages[datum.genre]}%</span></p>
+            <p><strong>分析电影数量:</strong> ${datum.movieCount}部</p>
+            <p><strong>平均票房:</strong> <span class="box-office">${datum.avgBoxOffice}M$</span></p>
+            <p><strong>总票房:</strong> <span class="box-office">${datum.totalBoxOffice.toLocaleString()}M$</span></p>
+            <p><em>点击隐藏详情</em></p>
+          `;
+        } else {
+          tooltip.innerHTML = `
+            <h3>${datum.movieName}</h3>
+            <p>
+              <span class="genre" style="${genreStyle}">${datum.genre}</span>
+              <span>豆瓣排名: <span class="rank">#${datum.rank}</span></span>
+            </p>
+            <p><strong>豆瓣评分:</strong> <span class="rating">${datum.rating}</span></p>
+            <p><strong>全球票房:</strong> <span class="box-office">${datum.boxOffice.toLocaleString()}M$</span></p>
+            <p><strong>类型占比:</strong> <span class="angle">${datum.genrePercentage}%</span> (角度: ${datum.genreAngle}°)</p>
+            <p><strong>类型平均评分:</strong> ${datum.genreAvgRating}</p>
+            <p><strong>类型平均票房:</strong> ${datum.genreAvgBoxOffice}M$</p>
+            <p><strong>类型内序号:</strong> 第${datum.pillarIndex}部</p>
+            <p><em>点击隐藏详情</em></p>
+          `;
+        }
+        
+        tooltip.style.left = finalX + 'px';
+        tooltip.style.top = finalY + 'px';
+        tooltip.style.opacity = '1';
+        tooltip.style.borderColor = genreColor;
+        
+        const hideTooltip = () => {
+          tooltip.style.opacity = '0';
+          tooltip.removeEventListener('click', hideTooltip);
+          document.removeEventListener('click', hideOnClickOutside);
+        };
+        
+        const hideOnClickOutside = (e) => {
+          if (!tooltip.contains(e.target)) {
+            hideTooltip();
+          }
+        };
+        
+        tooltip.addEventListener('click', hideTooltip);
+        setTimeout(() => {
+          document.addEventListener('click', hideOnClickOutside);
+        }, 10);
+      }
+
+
+      async function renderChart() {
+        const pillarData = generatePillarData();
+
+        const spec = {
+          $schema: "https://vega.github.io/schema/vega-lite/v5.json",
+          width: 1200, 
+          height: 1200, 
+          data: { values: pillarData },
+          background: "transparent",
+          layer: [
+            {
+              mark: {
+                type: "arc",
+                innerRadius: 250,
+                outerRadius: { 
+                  field: "height",
+                  expr: "250 + datum.height * 2.2"
+                },
+                stroke: "#fff",
+                strokeWidth: 1,
+                strokeOpacity: 0.8,
+                cornerRadius: 3
+              },
+              encoding: {
+                theta: { 
+                  field: "startAngle", 
+                  type: "quantitative",
+                  scale: { domain: [0, 360] }
+                },
+                theta2: { 
+                  field: "endAngle", 
+                  type: "quantitative"
+                },
+                color: { 
+                  field: "color", 
+                  type: "nominal", 
+                  scale: null,
+                  legend: null
+                }
+              }
+            },
+            {
+              data: {
+                values: targetGenres.map(genre => ({
+                  angle: genreAngles[genre].startAngle,
+                  genre: genre
+                }))
+              },
+              mark: {
+                type: "rule",
+                stroke: "rgba(255, 255, 255, 0.3)",
+                strokeWidth: 1.5,
+                strokeDash: [4, 2],
+                y2: { expr: "380" }
+              },
+              encoding: {
+                theta: { field: "angle", type: "quantitative" }
+              }
+            },
+            {
+              data: {
+                values: targetGenres.map(genre => ({
+                  genre: genre,
+                  centerAngle: genreAngles[genre].startAngle + (parseFloat(genreAngles[genre].angle) / 2),
+                  color: genreColorMap[genre]
+                }))
+              },
+              mark: {
+                type: "text",
+                fontSize: 14,
+                align: "center",
+                baseline: "middle",
+                fontWeight: "bold"
+              },
+              encoding: {
+                theta: { 
+                  field: "centerAngle", 
+                  type: "quantitative"
+                },
+                radius: { value: 220 },
+                text: { field: "genre" },
+                color: { 
+                  field: "color", 
+                  type: "nominal", 
+                  scale: null
+                }
+              }
+            }
+          ],
+          config: {
+            arc: { cornerRadius: 4 },
+            view: { 
+              stroke: null,
+              fill: "transparent"
+            },
+            background: "transparent"
+          }
+        };
+
+        try {
+          const result = await vegaEmbed('#vis-container', spec, { 
+            actions: false,
+            renderer: 'svg'
+          });
+          
+          const view = result.view;
+          
+          view.addEventListener('mouseover', (event, item) => {
+            if (item && item.datum && item.datum.movieName) {
+              showTooltip(event, item.datum, false);
+            }
+          });
+          
+          view.addEventListener('click', (event, item) => {
+            if (item && item.datum && item.datum.movieName) {
+              showTooltip(event, item.datum, false);
+            }
+          });
+          
+          drawCirclesWithSVG();
+          
+          document.getElementById('tooltip').style.opacity = '0';
+          
+        } catch (err) {
+          console.error('环形图渲染失败:', err);
+        }
+      }
+
+      renderTypeLegend();
+      await renderChart();
+      
+      window.addEventListener('resize', () => {
+        const tooltip = document.getElementById('tooltip');
+        tooltip.style.opacity = '0';
+      });
+    });
+  </script>
+</body>
+</html>

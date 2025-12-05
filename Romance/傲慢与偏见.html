@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>傲慢与偏见 </title>
+    <script src="https://cdn.jsdelivr.net/npm/vega@5.27.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.16.1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.22.2"></script>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            background: linear-gradient(rgba(26, 26, 46, 0.9), rgba(26, 26, 46, 0.95));
+            margin: 0;
+            padding: 40px 20px;
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle var(--duration) ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
+        }
+        
+        .glow-effect {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .glow-1, .glow-2, .glow-3 {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.15;
+            animation: pulse 8s ease-in-out infinite alternate;
+        }
+        
+        .glow-1 {
+            background: linear-gradient(45deg, #8b5cf6, #3b82f6);
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .glow-2 {
+            background: linear-gradient(45deg, #ec4899, #f59e0b);
+            width: 250px;
+            height: 250px;
+            bottom: 15%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        .glow-3 {
+            background: linear-gradient(45deg, #10b981, #06b6d4);
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: 80%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 0.1; transform: scale(1); }
+            50% { opacity: 0.2; transform: scale(1.1); }
+            100% { opacity: 0.15; transform: scale(1); }
+        }
+        
+        .chart-container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(37, 37, 71, 0.5);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 
+                0 12px 32px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(139, 92, 246, 0.2); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(6px);
+            position: relative;
+            z-index: 1;
+            background-image: url('傲慢与偏见.webp');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-blend-mode: overlay;
+            min-height: 500px;
+            transition: box-shadow 0.5s ease;
+        }
+        
+        .chart-container:hover {
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.7),
+                0 0 80px rgba(139, 92, 246, 0.3); 
+        }
+        
+        .chart-container::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            background: linear-gradient(45deg, 
+                rgba(139, 92, 246, 0.3), 
+                rgba(59, 130, 246, 0.3), 
+                rgba(236, 72, 153, 0.3), 
+                rgba(139, 92, 246, 0.3));
+            border-radius: 17px;
+            z-index: -1;
+            opacity: 0;
+            animation: borderGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.7; }
+        }
+        
+        h1 {
+            color: #f1f5f9;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+            font-size: 28px;
+            text-shadow: 
+                0 2px 6px rgba(0, 0, 0, 0.8),
+                0 0 20px rgba(139, 92, 246, 0.4); 
+            letter-spacing: 1px;
+            background: rgba(37, 37, 71, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            animation: textGlow 4s ease-in-out infinite alternate;
+        }
+        
+        @keyframes textGlow {
+            0%, 100% { 
+                text-shadow: 
+                    0 2px 6px rgba(0, 0, 0, 0.8),
+                    0 0 20px rgba(139, 92, 246, 0.4);
+            }
+            50% { 
+                text-shadow: 
+                    0 2px 6px rgba(0, 0, 0, 0.8),
+                    0 0 30px rgba(139, 92, 246, 0.6),
+                    0 0 40px rgba(59, 130, 246, 0.3);
+            }
+        }
+        
+        .movie-title {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(59, 130, 246, 0.3));
+            border-radius: 8px;
+            margin-top: 5px;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+        
+        @keyframes titleGlow {
+            0%, 100% { 
+                box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+            }
+            50% { 
+                box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4),
+                           0 0 30px rgba(59, 130, 246, 0.2);
+            }
+        }
+        
+        .poster-info {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #cbd5e1;
+            font-style: italic;
+            background: rgba(37, 37, 71, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            animation: fadeInOut 5s ease-in-out infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="glow-effect">
+        <div class="glow-1"></div>
+        <div class="glow-2"></div>
+        <div class="glow-3"></div>
+    </div>
+    
+    <div class="chart-container">
+        <h1>《傲慢与偏见》<br><span class="movie-title">情节发展时间轴</span></h1>
+        <div id="curved-timeline"></div>
+        
+        <div class="poster-info">
+            <p>背景：2005年版《傲慢与偏见》电影海报</p>
+            <p>导演：乔·怀特 | 主演：凯拉·奈特莉、马修·麦克费登</p>
+        </div>
+    </div>
+
+    <script>
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 80;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const left = Math.random() * 100;
+                const top = Math.random() * 100;
+                
+                const size = Math.random() * 3 + 1;
+                
+                const duration = Math.random() * 3 + 2;
+                
+                let color = 'white';
+                if (Math.random() < 0.2) {
+                    const colors = ['#8b5cf6', '#3b82f6', '#ec4899', '#f59e0b', '#10b981'];
+                    color = colors[Math.floor(Math.random() * colors.length)];
+                }
+                
+                star.style.cssText = `
+                    left: ${left}%;
+                    top: ${top}%;
+                    width: ${size}px;
+                    height: ${size}px;
+                    background-color: ${color};
+                    --duration: ${duration}s;
+                    animation-delay: ${Math.random() * duration}s;
+                `;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+        
+        createStars();
+
+        const curvedTimelineSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+            "width": 800,
+            "height": 400,
+            "background": "transparent",
+            "title": {
+                "text": "",
+                "fontSize": 0
+            },
+            "data": {
+                "values": [
+                    {"event": "初次相遇结偏见", "x": 1, "y": 10, "stage": "开端", "conflict": "傲慢VS偏见", "core_char": "伊丽莎白、达西"},
+                    {"event": "韦翰恶意诋毁", "x": 2, "y": 8, "stage": "发展", "conflict": "误解加深", "core_char": "伊丽莎白、韦翰"},
+                    {"event": "达西首次求婚遭拒", "x": 3, "y": 12, "stage": "高潮1", "conflict": "冲突爆发", "core_char": "伊丽莎白、达西"},
+                    {"event": "达西长信自证", "x": 4, "y": 9, "stage": "转折", "conflict": "偏见松动", "core_char": "伊丽莎白、达西"},
+                    {"event": "达西默默相助", "x": 5, "y": 11, "stage": "发展", "conflict": "傲慢消解", "core_char": "伊丽莎白、达西、莉迪亚"},
+                    {"event": "二次求婚终成眷属", "x": 6, "y": 10, "stage": "结局", "conflict": "矛盾化解", "core_char": "伊丽莎白、达西"}
+                ]
+            },
+            "layer": [
+                {
+                    "mark": {
+                        "type": "line",
+                        "interpolate": "monotone",
+                        "strokeWidth": 3,
+                        "stroke": "rgba(255, 255, 255, 0.9)",
+                        "strokeOpacity": 0.9,
+                        "strokeDash": [6, 4],
+                        "point": false
+                    },
+                    "encoding": {
+                        "x": {"field": "x", "type": "quantitative", "axis": null},
+                        "y": {"field": "y", "type": "quantitative", "axis": null}
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "circle",
+                        "size": 180,
+                        "stroke": "rgba(255, 255, 255, 1)",
+                        "strokeWidth": 3,
+                        "opacity": 0.95,
+                        "fillOpacity": 0.8
+                    },
+                    "encoding": {
+                        "x": {"field": "x", "type": "quantitative"},
+                        "y": {"field": "y", "type": "quantitative"},
+                        "color": {
+                            "field": "conflict",
+                            "type": "nominal",
+                            "scale": {
+                                "domain": ["傲慢VS偏见", "误解加深", "冲突爆发", "偏见松动", "傲慢消解", "矛盾化解"],
+                                "range": [
+                                    "rgba(248, 113, 113, 0.95)",
+                                    "rgba(251, 146, 60, 0.95)",
+                                    "rgba(239, 68, 68, 0.95)",
+                                    "rgba(96, 165, 250, 0.95)",
+                                    "rgba(52, 211, 153, 0.95)",
+                                    "rgba(16, 185, 129, 0.95)"
+                                ]
+                            },
+                            "legend": null  
+                        },
+                        "tooltip": [
+                            {"field": "event", "title": "📖 情节"},
+                            {"field": "stage", "title": "🎭 故事阶段"},
+                            {"field": "conflict", "title": "💔 状态"},
+                            {"field": "core_char", "title": "👥 核心人物"}
+                        ]
+                    }
+                },
+                {
+                    "mark": {
+                        "type": "text",
+                        "font": "Georgia",
+                        "fontSize": 13,
+                        "align": "center",
+                        "dy": -18,
+                        "color": "#f8fafc",
+                        "fontWeight": "bold",
+                        "textShadow": "0 2px 4px rgba(0, 0, 0, 0.8)"
+                    },
+                    "encoding": {
+                        "x": {"field": "x", "type": "quantitative"},
+                        "y": {"field": "y", "type": "quantitative"},
+                        "text": {"field": "event", "type": "nominal"},
+                        "dy": {
+                            "condition": {"test": "datum.x % 2 === 0", "value": 20},
+                            "value": -20
+                        }
+                    }
+                }
+            ],
+            "config": {
+                "view": {"stroke": "transparent"},
+                "background": "transparent"
+            },
+            "encoding": {
+                "x": {
+                    "field": "x",
+                    "type": "quantitative",
+                    "axis": {
+                        "title": "📜 故事推进顺序",
+                        "titleColor": "#e2e8f0",
+                        "titleFont": "Georgia",
+                        "titleFontSize": 14,
+                        "labelColor": "#f1f5f9",
+                        "labelFont": "Georgia",
+                        "labelFontSize": 12,
+                        "tickCount": 6,
+                        "grid": false,
+                        "domainColor": "rgba(255, 255, 255, 0.3)",
+                        "gridColor": "rgba(255, 255, 255, 0.1)",
+                        "tickColor": "rgba(255, 255, 255, 0.3)"
+                    }
+                },
+                "y": {
+                    "field": "y",
+                    "type": "quantitative",
+                    "axis": null
+                }
+            }
+        };
+
+        vegaEmbed('#curved-timeline', curvedTimelineSpec, {
+            actions: false,
+            renderer: 'svg'
+        }).catch(err => console.error('渲染失败：', err));
+    </script>
+</body>
+</html>

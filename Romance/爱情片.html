@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top250爱情电影</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #000;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            padding: 40px; 
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0; 
+            pointer-events: none; 
+        }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.2; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .page-title {
+            color: #fff;
+            text-align: center;
+            font-size: 24px;
+            text-shadow: 0 0 10px rgba(255,215,0,0.3);
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 100;
+        }
+
+        #posterContainer {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 120px); 
+            z-index: 1; 
+        }
+
+        .poster-item {
+            position: absolute;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #111;
+            z-index: 1;
+        }
+
+        .poster-item:hover {
+            transform: scale(1.15);
+            box-shadow: 0 8px 20px rgba(255,255,255,0.15);
+            z-index: 10;
+        }
+
+        .poster-item.highlight {
+            box-shadow: 0 6px 20px rgba(255,215,0,0.15);
+            z-index: 2;
+        }
+
+        .poster-item.playing::after {
+            content: "🎵";
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            font-size: 16px;
+            background: rgba(0,0,0,0.7);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+        }
+
+        .poster-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .poster-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.9));
+            color: #fff;
+            padding: 6px 4px;
+            font-size: 11px;
+            font-weight: bold;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .poster-item:hover .poster-info {
+            opacity: 1;
+        }
+
+        audio {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+
+    <h1 class="page-title">Top250爱情电影</h1>
+    
+    <div id="posterContainer">
+        <div class="poster-item" style="width: 80px; height: 120px; left: 5%; top: 5%;">
+            <img src="阿甘正传.webp" alt="阿甘正传"><div class="poster-info">阿甘正传</div>
+            <audio src="阿甘正传.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 75px; height: 110px; left: 12%; top: 8%;">
+            <img src="爱乐之城.webp" alt="爱乐之城"><div class="poster-info">爱乐之城</div>
+            <audio src="爱乐之城.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 95px; height: 140px; left: 19%; top: 3%;"> 
+            <img src="爱在黎明破晓前.webp" alt="爱在黎明破晓前"><div class="poster-info">爱在黎明破晓前</div>
+            <audio src="爱在黎明破晓前.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 70px; height: 105px; left: 29%; top: 7%;">
+            <img src="爱在日落黄昏时.webp" alt="爱在日落黄昏时"><div class="poster-info">爱在日落黄昏时</div>
+            <audio src="爱在日落黄昏时.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 82px; height: 118px; left: 36%; top: 4%;">
+            <img src="爱在午夜降临前.webp" alt="爱在午夜降临前"><div class="poster-info">爱在午夜降临前</div>
+            <audio src="爱在午夜降临前.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 90px; height: 135px; left: 44%; top: 2%;"> 
+            <img src="傲慢与偏见.webp" alt="傲慢与偏见"><div class="poster-info">傲慢与偏见</div>
+            <audio src="傲慢与偏见.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 100px; height: 150px; left: 53%; top: 0%;"> 
+            <img src="霸王别姬.webp" alt="霸王别姬"><div class="poster-info">霸王别姬</div>
+            <audio src="霸王别姬.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 76px; height: 112px; left: 64%; top: 7%;">
+            <img src="本杰明·巴顿奇事.webp" alt="本杰明·巴顿奇事"><div class="poster-info">本杰明·巴顿奇事</div>
+            <audio src="本杰明·巴顿奇事.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 84px; height: 122px; left: 71%; top: 4%;">
+            <img src="侧耳倾听.webp" alt="侧耳倾听"><div class="poster-info">侧耳倾听</div>
+            <audio src="侧耳倾听.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 78px; height: 115px; left: 79%; top: 6%;">
+            <img src="城市之光.webp" alt="城市之光"><div class="poster-info">城市之光</div>
+            <audio src="城市之光.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 81px; height: 118px; left: 86%; top: 5%;">
+            <img src="初恋这件小事.webp" alt="初恋这件小事"><div class="poster-info">初恋这件小事</div>
+            <audio src="初恋这件小事.mp3" preload="none">
+        </div>
+
+        <div class="poster-item" style="width: 75px; height: 110px; left: 3%; top: 25%;">
+            <img src="春光乍泄.webp" alt="春光乍泄"><div class="poster-info">春光乍泄</div>
+            <audio src="春光乍泄.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 92px; height: 138px; left: 10%; top: 22%;"> 
+            <img src="大话西游之大圣娶亲.webp" alt="大话西游之大圣娶亲"><div class="poster-info">大话西游之大圣娶亲</div>
+            <audio src="大话西游之大圣娶亲.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 70px; height: 105px; left: 20%; top: 26%;">
+            <img src="大话西游之月光宝盒.webp" alt="大话西游之月光宝盒"><div class="poster-info">大话西游之月光宝盒</div>
+            <audio src="大话西游之月光宝盒.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 85px; height: 125px; left: 27%; top: 24%;">
+            <img src="大鱼.webp" alt="大鱼"><div class="poster-info">大鱼</div>
+            <audio src="大鱼.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 77px; height: 115px; left: 35%; top: 25%;">
+            <img src="东邪西毒.webp" alt="东邪西毒"><div class="poster-info">东邪西毒</div>
+            <audio src="东邪西毒.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 80px; height: 118px; left: 42%; top: 23%;">
+            <img src="断背山.webp" alt="断背山"><div class="poster-info">断背山</div>
+            <audio src="断背山.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 73px; height: 108px; left: 49%; top: 26%;">
+            <img src="芙蓉镇.webp" alt="芙蓉镇"><div class="poster-info">芙蓉镇</div>
+            <audio src="芙蓉镇.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 93px; height: 139px; left: 56%; top: 23%;"> 
+            <img src="哈尔的移动城堡.webp" alt="哈尔的移动城堡"><div class="poster-info">哈尔的移动城堡</div>
+            <audio src="哈尔的移动城堡.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 76px; height: 112px; left: 65%; top: 25%;">
+            <img src="花束般的恋爱.webp" alt="花束般的恋爱"><div class="poster-info">花束般的恋爱</div>
+            <audio src="花束般的恋爱.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 90px; height: 135px; left: 72%; top: 22%;"> 
+            <img src="花样年华.webp" alt="花样年华"><div class="poster-info">花样年华</div>
+            <audio src="花样年华.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 79px; height: 116px; left: 81%; top: 25%;">
+            <img src="魂断蓝桥.webp" alt="魂断蓝桥"><div class="poster-info">魂断蓝桥</div>
+            <audio src="魂断蓝桥.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 72px; height: 108px; left: 88%; top: 24%;">
+            <img src="剪刀手爱德华.webp" alt="剪刀手爱德华"><div class="poster-info">剪刀手爱德华</div>
+            <audio src="剪刀手爱德华.mp3" preload="none">
+        </div>
+
+        <div class="poster-item" style="width: 86px; height: 126px; left: 2%; top: 45%;">
+            <img src="恋恋笔记本.webp" alt="恋恋笔记本"><div class="poster-info">恋恋笔记本</div>
+            <audio src="恋恋笔记本.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 98px; height: 147px; left: 10%; top: 43%;"> 
+            <img src="乱世佳人.webp" alt="乱世佳人"><div class="poster-info">乱世佳人</div>
+            <audio src="乱世佳人.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 102px; height: 153px; left: 20%; top: 41%;"> 
+            <img src="罗马假日.webp" alt="罗马假日"><div class="poster-info">罗马假日</div>
+            <audio src="罗马假日.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 70px; height: 105px; left: 31%; top: 46%;">
+            <img src="美丽人生.webp" alt="美丽人生"><div class="poster-info">美丽人生</div>
+            <audio src="美丽人生.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 85px; height: 125px; left: 38%; top: 43%;">
+            <img src="摩登时代.webp" alt="摩登时代"><div class="poster-info">摩登时代</div>
+            <audio src="摩登时代.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 95px; height: 142px; left: 46%; top: 42%;"> 
+            <img src="你的名字.webp" alt="你的名字"><div class="poster-info">你的名字</div>
+            <audio src="你的名字.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 80px; height: 118px; left: 55%; top: 44%;">
+            <img src="怦然心动.webp" alt="怦然心动"><div class="poster-info">怦然心动</div>
+            <audio src="怦然心动.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 73px; height: 108px; left: 62%; top: 46%;">
+            <img src="贫民窟的百万富翁.webp" alt="贫民窟的百万富翁"><div class="poster-info">贫民窟的百万富翁</div>
+            <audio src="贫民窟的百万富翁.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 83px; height: 123px; left: 69%; top: 43%;">
+            <img src="千年女优.webp" alt="千年女优"><div class="poster-info">千年女优</div>
+            <audio src="千年女优.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 94px; height: 141px; left: 77%; top: 42%;"> 
+            <img src="倩女幽魂.webp" alt="倩女幽魂"><div class="poster-info">倩女幽魂</div>
+            <audio src="倩女幽魂.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 84px; height: 122px; left: 86%; top: 44%;">
+            <img src="青蛇.webp" alt="青蛇"><div class="poster-info">青蛇</div>
+            <audio src="青蛇.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 79px; height: 116px; left: 93%; top: 45%;">
+            <img src="情书.webp" alt="情书"><div class="poster-info">情书</div>
+            <audio src="情书.mp3" preload="none">
+        </div>
+
+        <div class="poster-item" style="width: 72px; height: 108px; left: 4%; top: 65%;">
+            <img src="请以你的名字呼唤我.webp" alt="请以你的名字呼唤我"><div class="poster-info">请以你的名字呼唤我</div>
+            <audio src="请以你的名字呼唤我.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 86px; height: 126px; left: 11%; top: 63%;">
+            <img src="三傻大闹宝莱坞.webp" alt="三傻大闹宝莱坞"><div class="poster-info">三傻大闹宝莱坞</div>
+            <audio src="三傻大闹宝莱坞.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 75px; height: 110px; left: 19%; top: 66%;">
+            <img src="色戒.webp" alt="色戒"><div class="poster-info">色戒</div>
+            <audio src="色戒.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 96px; height: 144px; left: 26%; top: 63%;"> 
+            <img src="时空恋旅人.webp" alt="时空恋旅人"><div class="poster-info">时空恋旅人</div>
+            <audio src="时空恋旅人.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 70px; height: 105px; left: 36%; top: 65%;">
+            <img src="泰坦尼克号.webp" alt="泰坦尼克号"><div class="poster-info">泰坦尼克号</div>
+            <audio src="泰坦尼克号.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 100px; height: 150px; left: 43%; top: 61%;"> 
+            <img src="唐伯虎点秋香.webp" alt="唐伯虎点秋香"><div class="poster-info">唐伯虎点秋香</div>
+            <audio src="唐伯虎点秋香.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 77px; height: 115px; left: 53%; top: 65%;">
+            <img src="天使爱美丽.webp" alt="天使爱美丽"><div class="poster-info">天使爱美丽</div>
+            <audio src="天使爱美丽.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 80px; height: 118px; left: 60%; top: 64%;">
+            <img src="天堂电影院.webp" alt="天堂电影院"><div class="poster-info">天堂电影院</div>
+            <audio src="天堂电影院.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 73px; height: 108px; left: 67%; top: 66%;">
+            <img src="甜蜜蜜.webp" alt="甜蜜蜜"><div class="poster-info">甜蜜蜜</div>
+            <audio src="甜蜜蜜.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 92px; height: 138px; left: 74%; top: 63%;"> 
+            <img src="喜剧之王.webp" alt="喜剧之王"><div class="poster-info">喜剧之王</div>
+            <audio src="喜剧之王.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 76px; height: 112px; left: 83%; top: 65%;">
+            <img src="喜宴.webp" alt="喜宴"><div class="poster-info">喜宴</div>
+            <audio src="喜宴.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 84px; height: 122px; left: 90%; top: 64%;">
+            <img src="新龙门客栈.webp" alt="新龙门客栈"><div class="poster-info">新龙门客栈</div>
+            <audio src="新龙门客栈.mp3" preload="none">
+        </div>
+
+        <div class="poster-item" style="width: 79px; height: 116px; left: 15%; top: 82%;">
+            <img src="幸福终点站.webp" alt="幸福终点站"><div class="poster-info">幸福终点站</div>
+            <audio src="幸福终点站.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 95px; height: 142px; left: 24%; top: 80%;"> 
+            <img src="阳光灿烂的日子.webp" alt="阳光灿烂的日子"><div class="poster-info">阳光灿烂的日子</div>
+            <audio src="阳光灿烂的日子.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 74px; height: 110px; left: 34%; top: 83%;">
+            <img src="一一.webp" alt="一一"><div class="poster-info">一一</div>
+            <audio src="一一.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 98px; height: 147px; left: 42%; top: 80%;"> 
+            <img src="音乐之声.webp" alt="音乐之声"><div class="poster-info">音乐之声</div>
+            <audio src="音乐之声.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 77px; height: 114px; left: 52%; top: 82%;">
+            <img src="萤火之森.webp" alt="萤火之森"><div class="poster-info">萤火之森</div>
+            <audio src="萤火之森.mp3" preload="none">
+        </div>
+        <div class="poster-item" style="width: 83px; height: 123px; left: 60%; top: 80%;">
+            <img src="雨中曲.webp" alt="雨中曲"><div class="poster-info">雨中曲</div>
+            <audio src="雨中曲.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 96px; height: 144px; left: 68%; top: 81%;"> 
+            <img src="真爱至上.webp" alt="真爱至上"><div class="poster-info">真爱至上</div>
+            <audio src="真爱至上.mp3" preload="none">
+        </div>
+        <div class="poster-item highlight" style="width: 100px; height: 150px; left: 78%; top: 79%;"> 
+            <img src="重庆森林.webp" alt="重庆森林"><div class="poster-info">重庆森林</div>
+            <audio src="重庆森林.mp3" preload="none">
+        </div>
+    </div>
+
+    <script>
+        function createStars() {
+            const starsContainer = document.querySelector('.stars');
+            const starCount = 150; 
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                const x = Math.random() * 100; 
+                const y = Math.random() * 100; 
+                
+                const size = Math.random() * 2 + 1;
+                
+                const delay = Math.random() * 5;
+                
+                const opacity = Math.random() * 0.8 + 0.2;
+                
+                star.style.left = `${x}%`;
+                star.style.top = `${y}%`;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.animationDelay = `${delay}s`;
+                star.style.opacity = opacity;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        window.addEventListener('load', createStars);
+
+        let currentPlayingAudio = null;
+        let currentPlayingPoster = null;
+
+        document.querySelectorAll('.poster-item').forEach(poster => {
+            poster.addEventListener('click', () => {
+                const audio = poster.querySelector('audio');
+                const isPlaying = poster.classList.contains('playing');
+
+                if (currentPlayingAudio) {
+                    currentPlayingAudio.pause();
+                    currentPlayingPoster.classList.remove('playing');
+                }
+
+                if (isPlaying) {
+                    currentPlayingAudio = null;
+                    currentPlayingPoster = null;
+                } else {
+                    audio.play().catch(err => {
+                        console.log('音频播放失败：', err);
+                        alert('请点击页面后再尝试播放（浏览器音频自动播放限制）');
+                    });
+                    poster.classList.add('playing');
+                    currentPlayingAudio = audio;
+                    currentPlayingPoster = poster;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
