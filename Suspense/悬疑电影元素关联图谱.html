@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>悬疑电影主题关联网络 - 紧凑版</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Roboto+Mono:wght@400&display=swap"
+    rel="stylesheet">
+
+  <style>
+    body {
+      background-color: #050505;
+      color: #ccc;
+      font-family: 'Noto Serif SC', serif;
+      margin: 0;
+      overflow: hidden;
+      display: flex;
+      height: 100vh;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #main-wrapper {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: #0a0a0a;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.9);
+      border: 1px solid #1a1a1a;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1.main-title {
+      position: absolute;
+      top: 25px;
+      left: 35px;
+      font-size: 26px;
+      color: #e0e0e0;
+      letter-spacing: 3px;
+      border-bottom: 2px solid #8a0e0e;
+      padding-bottom: 8px;
+      z-index: 10;
+      pointer-events: none;
+      margin: 0;
+      font-family: 'Noto Serif SC', serif;
+      text-shadow: 0 4px 10px rgba(0, 0, 0, 0.9);
+      text-transform: uppercase;
+    }
+
+    h1.main-title span {
+      font-size: 11px;
+      color: #666;
+      display: block;
+      margin-top: 6px;
+      font-family: 'Roboto Mono', monospace;
+      font-weight: 300;
+      letter-spacing: 1px;
+    }
+
+    #chart {
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at center, #111 0%, #000 90%);
+    }
+
+    .node circle {
+      cursor: grab;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .node circle:active {
+      cursor: grabbing;
+    }
+
+    .node text {
+      pointer-events: none;
+      font-family: 'Noto Serif SC', serif;
+      fill: #dcdcdc;
+      text-shadow:
+        -1px -1px 0 #000,
+        1px -1px 0 #000,
+        -1px 1px 0 #000,
+        1px 1px 0 #000,
+        0 0 8px rgba(0, 0, 0, 0.8);
+      opacity: 0.9;
+      font-weight: 400;
+    }
+
+    .link {
+      stroke-opacity: 0.3;
+      transition: stroke-opacity 0.3s, stroke 0.3s;
+      mix-blend-mode: screen;
+    }
+
+    .tooltip {
+      position: absolute;
+      background: rgba(20, 20, 20, 0.98);
+      color: #eee;
+      padding: 10px 14px;
+      border: 1px solid #444;
+      border-left: 3px solid #b71c1c;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 13px;
+      line-height: 1.6;
+      z-index: 20;
+      min-width: 120px;
+    }
+
+    .tooltip strong {
+      color: #ef5350;
+      font-size: 15px;
+      display: block;
+      margin-bottom: 4px;
+      font-family: 'Roboto Mono', monospace;
+      border-bottom: 1px solid #333;
+      padding-bottom: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="main-wrapper">
+    <h1 class="main-title">
+      剧情元素关联图谱
+      <span>Suspense Plot Elements Network Analysis</span>
+    </h1>
+
+    <div id="chart"></div>
+    <div class="tooltip" id="tooltip"></div>
+  </div>
+
+  <script>
+    const rawMovies = [
+      { title: "肖申克的救赎", keywords: ["冤案", "越狱", "谋杀", "黑钱"] },
+      { title: "控方证人", keywords: ["谋杀", "庭审", "证人", "反转"] },
+      { title: "无间道", keywords: ["卧底", "黑帮", "警察", "内鬼"] },
+      { title: "致命ID", keywords: ["凶杀", "多重人格", "密室", "雨夜"] },
+      { title: "七宗罪", keywords: ["连环杀手", "宗教", "警探", "暴食"] },
+      { title: "看不见的客人", keywords: ["密室", "车祸", "反转", "谎言"] },
+      { title: "杀人回忆", keywords: ["连环杀手", "奸杀", "悬案", "警察"] },
+      { title: "禁闭岛", keywords: ["精神病", "失踪", "调查", "阴谋"] },
+      { title: "搏击俱乐部", keywords: ["精神分裂", "暴力", "阴谋", "地下组织"] },
+      { title: "电锯惊魂", keywords: ["密室", "游戏", "绑架", "连环杀手"] },
+      { title: "罗生门", keywords: ["谋杀", "证词", "真相", "谎言"] },
+      { title: "窃听风暴", keywords: ["监控", "特工", "政治", "秘密"] },
+      { title: "消失的爱人", keywords: ["失踪", "婚姻", "谋杀", "伪造"] },
+      { title: "恐怖游轮", keywords: ["循环", "游轮", "凶杀", "神秘"] },
+      { title: "心迷宫", keywords: ["尸体", "村庄", "谎言", "秘密"] },
+      { title: "记忆碎片", keywords: ["记忆", "复仇", "谋杀", "拼图"] },
+      { title: "蝴蝶效应", keywords: ["穿越", "改变过去", "悲剧", "混沌"] },
+      { title: "第六感", keywords: ["鬼魂", "心理医生", "秘密", "反转"] },
+      { title: "误杀", keywords: ["掩盖", "警察", "家庭", "谋杀"] }
+    ];
+
+    const nodesMap = new Map();
+    const linksMap = new Map();
+
+    rawMovies.forEach(m => {
+      const kws = m.keywords;
+      kws.forEach(k => {
+        if (!nodesMap.has(k)) nodesMap.set(k, { id: k, value: 0 });
+        nodesMap.get(k).value += 1;
+      });
+      for (let i = 0; i < kws.length; i++) {
+        for (let j = i + 1; j < kws.length; j++) {
+          const source = kws[i] < kws[j] ? kws[i] : kws[j];
+          const target = kws[i] < kws[j] ? kws[j] : kws[i];
+          const key = source + "-" + target;
+          if (!linksMap.has(key)) linksMap.set(key, { source, target, value: 0 });
+          linksMap.get(key).value += 1;
+        }
+      }
+    });
+
+    const nodes = Array.from(nodesMap.values());
+    const links = Array.from(linksMap.values());
+
+    const chartDiv = document.getElementById("chart");
+    const width = chartDiv.clientWidth;
+    const height = chartDiv.clientHeight;
+
+    const colorScale = d3.scaleLinear()
+      .domain([0, 1, d3.max(nodes, d => d.value)])
+      .range(["#444", "#777", "#b71c1c"]);
+
+    const sizeScale = d3.scaleSqrt()
+      .domain([1, d3.max(nodes, d => d.value)])
+      .range([4, 18]);
+
+    const fontSizeScale = d3.scaleLinear()
+      .domain([1, d3.max(nodes, d => d.value)])
+      .range([10, 16]);
+
+    const svg = d3.select("#chart").append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", [0, 0, width, height])
+      .call(d3.zoom().scaleExtent([0.2, 5]).on("zoom", (event) => {
+        container.attr("transform", event.transform);
+      }));
+
+    const defs = svg.append("defs");
+    const filter = defs.append("filter")
+      .attr("id", "glow")
+      .attr("x", "-50%")
+      .attr("y", "-50%")
+      .attr("width", "200%")
+      .attr("height", "200%");
+    filter.append("feGaussianBlur")
+      .attr("stdDeviation", "2.5")
+      .attr("result", "coloredBlur");
+    const feMerge = filter.append("feMerge");
+    feMerge.append("feMergeNode").attr("in", "coloredBlur");
+    feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+    const container = svg.append("g");
+
+
+    const simulation = d3.forceSimulation(nodes)
+      .force("link", d3.forceLink(links).id(d => d.id).distance(60))
+      .force("charge", d3.forceManyBody().strength(-100))
+      .force("center", d3.forceCenter(width / 2, height / 2))
+      .force("x", d3.forceX(width / 2).strength(0.08))
+      .force("y", d3.forceY(height / 2).strength(0.08))
+      .force("collide", d3.forceCollide().radius(d => sizeScale(d.value) * 1.1).iterations(2));
+
+    simulation.tick(300);
+    simulation.alphaDecay(0.05);
+
+
+    const link = container.append("g")
+      .attr("class", "links")
+      .selectAll("line")
+      .data(links)
+      .enter().append("line")
+      .attr("class", "link")
+      .attr("stroke", "#8a0e0e")
+      .attr("stroke-width", d => Math.max(0.5, Math.sqrt(d.value) * 0.8))
+      .attr("x1", d => d.source.x)
+      .attr("y1", d => d.source.y)
+      .attr("x2", d => d.target.x)
+      .attr("y2", d => d.target.y);
+
+    const node = container.append("g")
+      .attr("class", "nodes")
+      .selectAll("g")
+      .data(nodes)
+      .enter().append("g")
+      .attr("transform", d => `translate(${d.x},${d.y})`)
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended));
+
+    node.append("circle")
+      .attr("r", d => sizeScale(d.value))
+      .attr("fill", d => d.value > 2 ? "#800000" : "#222")
+      .attr("stroke", d => colorScale(d.value))
+      .attr("stroke-width", d => d.value > 2 ? 0 : 1.5)
+      .style("filter", d => d.value > 2 ? "url(#glow)" : "none");
+
+    node.append("text")
+      .attr("dx", d => sizeScale(d.value) + 4)
+      .attr("dy", ".35em")
+      .style("font-size", d => fontSizeScale(d.value) + "px")
+      .style("fill", d => d.value > 2 ? "#fff" : "#aaa")
+      .style("font-weight", d => d.value > 2 ? "bold" : "normal")
+      .text(d => d.id);
+
+
+    node.on("mouseover", (event, d) => {
+      d3.select("#tooltip")
+        .style("opacity", 1)
+        .style("left", (event.pageX + 15) + "px")
+        .style("top", (event.pageY - 15) + "px")
+        .html(`<strong>${d.id}</strong>关联强度: <span style="color:#fff">${d.value}</span><br><span style="color:#666; font-size:11px">双击节点聚焦</span>`);
+
+      const connectedNodeIds = new Set();
+      connectedNodeIds.add(d.id);
+
+      link
+        .style("stroke", l => {
+          if (l.source.id === d.id || l.target.id === d.id) {
+            connectedNodeIds.add(l.source.id);
+            connectedNodeIds.add(l.target.id);
+            return "#ff3333";
+          }
+          return "#333";
+        })
+        .style("stroke-opacity", l => (l.source.id === d.id || l.target.id === d.id) ? 1 : 0.05)
+        .style("stroke-width", l => (l.source.id === d.id || l.target.id === d.id) ? 1.5 : 0.5);
+
+      node.style("opacity", n => connectedNodeIds.has(n.id) ? 1 : 0.1);
+
+      d3.select(event.currentTarget).select("text")
+        .style("fill", "#fff")
+        .style("font-size", "18px")
+        .style("z-index", 999);
+
+    }).on("mouseout", (event, d) => {
+      d3.select("#tooltip").style("opacity", 0);
+
+      link
+        .style("stroke", "#8a0e0e")
+        .style("stroke-opacity", 0.3)
+        .style("stroke-width", d => Math.max(0.5, Math.sqrt(d.value) * 0.8));
+
+      node.style("opacity", 1);
+
+      d3.select(event.currentTarget).select("text")
+        .style("fill", d => d.value > 2 ? "#fff" : "#aaa")
+        .style("font-size", d => fontSizeScale(d.value) + "px");
+    });
+
+    simulation.on("tick", () => {
+      node.attr("transform", d => {
+        return `translate(${d.x},${d.y})`;
+      });
+
+      link
+        .attr("x1", d => d.source.x)
+        .attr("y1", d => d.source.y)
+        .attr("x2", d => d.target.x)
+        .attr("y2", d => d.target.y);
+    });
+
+    function dragstarted(event, d) {
+      if (!event.active) simulation.alphaTarget(0.1).restart();
+      d.fx = d.x;
+      d.fy = d.y;
+      d3.select(this).select("circle").attr("stroke", "#fff");
+    }
+
+    function dragged(event, d) {
+      d.fx = event.x;
+      d.fy = event.y;
+    }
+
+    function dragended(event, d) {
+      if (!event.active) simulation.alphaTarget(0);
+      d.fx = null;
+      d.fy = null;
+      d3.select(this).select("circle").attr("stroke", colorScale(d.value));
+    }
+  </script>
+</body>
+
+</html>
