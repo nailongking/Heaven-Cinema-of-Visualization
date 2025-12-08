@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>看不见的客人：对话密度分析</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;700&family=Roboto+Mono:wght@300&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #050505;
+            color: #ccc;
+            font-family: 'Noto Serif SC', serif;
+            margin: 0;
+            overflow: hidden;
+            display: flex;
+            height: 100vh;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #main-wrapper {
+            display: flex;
+            width: 100vw;             
+            height: 100vh;  
+            box-shadow: 0 0 30px rgba(0,0,0,0.8);
+            background: #000;
+            overflow: hidden;    
+        }
+
+        #chart-container {
+            flex: 1; 
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(to right, #1a1a1a, #000000);
+            min-width: 0; 
+        }
+
+        #details-panel {
+            width: 250px;
+            flex-shrink: 0; 
+            background: rgba(10, 10, 10, 0.95);
+            border-left: 1px solid #333;
+            padding: 30px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+        }
+
+        h1.main-title {
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            font-size: 24px;
+            color: #fff;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #d63031;
+            padding-bottom: 10px;
+            z-index: 5;
+            pointer-events: none;
+            margin: 0;
+            font-family: 'Noto Serif SC', serif;
+        }
+
+        h1.main-title span {
+            font-size: 12px;
+            color: #777;
+            display: block;
+            margin-top: 5px;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .stat-card {
+            margin-bottom: 10px;
+            border-bottom: 1px solid #222;
+            padding-bottom: 5px;
+        }
+
+        .stat-card:last-child {
+            border-bottom: none;
+        }
+
+        .stat-card h3 {
+            color: #d63031;
+            font-size: 15px;
+            margin-bottom: 8px;
+            font-family: 'Roboto Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 33px;
+            font-weight: bold;
+            color: #fff;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .stat-desc {
+            font-size: 14px;
+            color: #888;
+            margin-top: 4px;
+            line-height: 1.6;
+        }
+
+        /* D3 Chart Styles */
+        .axis path,
+        .axis line {
+            stroke: #333;
+        }
+
+        .axis text {
+            fill: #666;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 11px;
+        }
+
+        .grid line {
+            stroke: #222;
+            stroke-opacity: 0.6;
+            stroke-dasharray: 2,2;
+        }
+        .grid path {
+            stroke-width: 0;
+        }
+
+        .line {
+            fill: none;
+            stroke: #d63031; 
+            stroke-width: 2.5px;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 6px rgba(214, 48, 49, 0.7));
+        }
+
+        .area {
+            fill: url(#gradient-area);
+            opacity: 0; 
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0,0,0,0.9);
+            border: 1px solid #d63031;
+            padding: 12px;
+            color: #fff;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 12px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-wrapper">
+        <div id="chart-container">
+            <h1 class="main-title">
+                《看不见的客人》：对话密度分析
+                <span>Dialogue Density Analysis (Char/Min)</span>
+            </h1>
+        </div>
+        
+        <div id="details-panel">
+            <div class="stat-card">
+                <h3>Avg.Density 
+                  平均密度</h3>
+                <div class="stat-value">278 <span style="font-size:14px; color:#666;">CPM</span></div>
+                <div class="stat-desc">整部电影的平均语速极快，高密度的信息量轰炸迫使观众全神贯注，无法喘息。</div>
+            </div>
+            <div class="stat-card">
+                <h3>Peak Moment 最高峰</h3>
+                <div class="stat-value">99 <span style="font-size:14px; color:#666;">MIN</span></div>
+                <div class="stat-desc">在第99分钟，对话密度达到 600 CPM 的峰值。这是真相揭露前的最后博弈，也是情绪崩溃的临界点。</div>
+            </div>
+            <div class="stat-card">
+                <div style="font-size: 12px; line-height: 1.6; color: #888; font-style: italic;">
+                    <span style="color: #d63031; font-weight: bold;">/// ANALYSIS ///</span><br>
+                    图表展示了每分钟的字符量。低谷代表着压抑的沉默与回忆，而尖峰则对应着激烈的质问与反转。
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tooltip" class="tooltip"></div>
+
+    <script>
+        const data = [
+          { minute: 0, count: 0 }, { minute: 1, count: 20 }, { minute: 2, count: 85 }, { minute: 3, count: 320 }, { minute: 4, count: 350 },
+          { minute: 5, count: 310 }, { minute: 6, count: 280 }, { minute: 7, count: 250 }, { minute: 8, count: 290 }, { minute: 9, count: 320 },
+          { minute: 10, count: 360 }, { minute: 11, count: 410 }, { minute: 12, count: 380 }, { minute: 13, count: 150 }, { minute: 14, count: 180 },
+          { minute: 15, count: 220 }, { minute: 16, count: 300 }, { minute: 17, count: 120 }, { minute: 18, count: 450 }, { minute: 19, count: 380 },
+          { minute: 20, count: 360 }, { minute: 21, count: 290 }, { minute: 22, count: 250 }, { minute: 23, count: 180 }, { minute: 24, count: 50 },
+          { minute: 25, count: 40 }, { minute: 26, count: 120 }, { minute: 27, count: 180 }, { minute: 28, count: 320 }, { minute: 29, count: 350 },
+          { minute: 30, count: 380 }, { minute: 31, count: 290 }, { minute: 32, count: 340 }, { minute: 33, count: 150 }, { minute: 34, count: 280 },
+          { minute: 35, count: 310 }, { minute: 36, count: 250 }, { minute: 37, count: 200 }, { minute: 38, count: 150 }, { minute: 39, count: 300 },
+          { minute: 40, count: 320 }, { minute: 41, count: 280 }, { minute: 42, count: 350 }, { minute: 43, count: 120 }, { minute: 44, count: 380 },
+          { minute: 45, count: 400 }, { minute: 46, count: 320 }, { minute: 47, count: 350 }, { minute: 48, count: 310 }, { minute: 49, count: 200 },
+          { minute: 50, count: 180 }, { minute: 51, count: 350 }, { minute: 52, count: 100 }, { minute: 53, count: 250 }, { minute: 54, count: 420 },
+          { minute: 55, count: 450 }, { minute: 56, count: 480 }, { minute: 57, count: 500 }, { minute: 58, count: 460 }, { minute: 59, count: 200 },
+          { minute: 60, count: 180 }, { minute: 61, count: 250 }, { minute: 62, count: 300 }, { minute: 63, count: 320 }, { minute: 64, count: 350 },
+          { minute: 65, count: 200 }, { minute: 66, count: 150 }, { minute: 67, count: 180 }, { minute: 68, count: 120 }, { minute: 69, count: 250 },
+          { minute: 70, count: 380 }, { minute: 71, count: 350 }, { minute: 72, count: 300 }, { minute: 73, count: 150 }, { minute: 74, count: 120 },
+          { minute: 75, count: 280 }, { minute: 76, count: 100 }, { minute: 77, count: 150 }, { minute: 78, count: 180 }, { minute: 79, count: 200 },
+          { minute: 80, count: 150 }, { minute: 81, count: 100 }, { minute: 82, count: 120 }, { minute: 83, count: 180 }, { minute: 84, count: 250 },
+          { minute: 85, count: 300 }, { minute: 86, count: 320 }, { minute: 87, count: 350 }, { minute: 88, count: 400 }, { minute: 89, count: 420 },
+          { minute: 90, count: 450 }, { minute: 91, count: 400 }, { minute: 92, count: 380 }, { minute: 93, count: 350 }, { minute: 94, count: 300 },
+          { minute: 95, count: 480 }, { minute: 96, count: 520 }, { minute: 97, count: 550 }, { minute: 98, count: 580 }, { minute: 99, count: 600 },
+          { minute: 100, count: 500 }, { minute: 101, count: 150 }, { minute: 102, count: 50 }
+        ];
+
+        const container = document.getElementById('chart-container');
+        const margin = { top: 100, right: 50, bottom: 50, left: 60 };
+        const width = container.offsetWidth - margin.left - margin.right;
+        const height = container.offsetHeight - margin.top - margin.bottom;
+
+        const svg = d3.select("#chart-container")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const defs = svg.append("defs");
+        const gradient = defs.append("linearGradient")
+            .attr("id", "gradient-area")
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "0%")
+            .attr("y2", "100%");
+        gradient.append("stop").attr("offset", "0%").attr("stop-color", "#d63031").attr("stop-opacity", 0.6);
+        gradient.append("stop").attr("offset", "100%").attr("stop-color", "#d63031").attr("stop-opacity", 0);
+
+        const x = d3.scaleLinear().domain([0, 102]).range([0, width]);
+        const y = d3.scaleLinear().domain([0, 650]).range([height, 0]);
+
+        function make_x_gridlines() { return d3.axisBottom(x).ticks(10) }
+        function make_y_gridlines() { return d3.axisLeft(y).ticks(5) }
+
+        svg.append("g")
+            .attr("class", "grid")
+            .attr("transform", `translate(0,${height})`)
+            .call(make_x_gridlines().tickSize(-height).tickFormat(""));
+
+        svg.append("g")
+            .attr("class", "grid")
+            .call(make_y_gridlines().tickSize(-width).tickFormat(""));
+
+        svg.append("g")
+            .attr("class", "axis")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x).tickFormat(d => d + "m"));
+
+        svg.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(y));
+
+        svg.append("text")
+            .attr("fill", "#666")
+            .attr("x", width)
+            .attr("y", height + 40)
+            .style("text-anchor", "end")
+            .style("font-family", "Roboto Mono")
+            .style("font-size", "12px")
+            .text("TIME (MINUTES)");
+
+        svg.append("text")
+            .attr("fill", "#666")
+            .attr("transform", "rotate(-90)")
+            .attr("y", -45)
+            .attr("dy", "0.71em")
+            .style("text-anchor", "end")
+            .style("font-family", "Roboto Mono")
+            .style("font-size", "12px")
+            .text("CHARS / MIN");
+
+        const line = d3.line()
+            .x(d => x(d.minute))
+            .y(d => y(d.count))
+            .curve(d3.curveMonotoneX); 
+
+        const path = svg.append("path")
+            .datum(data)
+            .attr("class", "line")
+            .attr("d", line);
+
+        const totalLength = path.node().getTotalLength();
+
+        path
+            .attr("stroke-dasharray", totalLength + " " + totalLength)
+            .attr("stroke-dashoffset", totalLength) 
+            .transition()
+            .duration(3500) 
+            .ease(d3.easeLinear) 
+            .attr("stroke-dashoffset", 0);
+
+        const area = d3.area()
+            .x(d => x(d.minute))
+            .y0(height)
+            .y1(d => y(d.count))
+            .curve(d3.curveMonotoneX);
+
+        const areaPath = svg.append("path")
+            .datum(data)
+            .attr("class", "area")
+            .attr("d", area);
+
+        areaPath.transition()
+            .delay(2000)
+            .duration(2000)
+            .style("opacity", 0.3);
+
+        const tooltip = d3.select("#tooltip");
+        const focusLineX = svg.append("line")
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 1)
+            .attr("stroke-dasharray", "3,3")
+            .attr("y1", 0).attr("y2", height)
+            .style("opacity", 0);
+
+        svg.append("rect")
+            .attr("width", width)
+            .attr("height", height)
+            .style("fill", "none")
+            .style("pointer-events", "all")
+            .on("mousemove", function(event) {
+                const bisect = d3.bisector(d => d.minute).left;
+                const x0 = x.invert(d3.pointer(event)[0]);
+                const i = bisect(data, x0, 1);
+                const d0 = data[i - 1];
+                const d1 = data[i];
+                if (!d0 || !d1) return;
+                const d = x0 - d0.minute > d1.minute - x0 ? d1 : d0;
+
+                focusLineX
+                    .attr("x1", x(d.minute))
+                    .attr("x2", x(d.minute))
+                    .style("opacity", 0.5);
+
+                tooltip
+                    .style("opacity", 1)
+                    .html(`<strong>Time:</strong> ${d.minute} min<br><strong>Density:</strong> ${d.count} cpm`)
+                    .style("left", (event.pageX + 15) + "px")
+                    .style("top", (event.pageY - 28) + "px");
+            })
+            .on("mouseout", function() {
+                focusLineX.style("opacity", 0);
+                tooltip.style("opacity", 0);
+            });
+
+    </script>
+</body>
+</html>
